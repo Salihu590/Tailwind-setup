@@ -1,14 +1,14 @@
 {
-  "name": "Global Symptom Ecology Atlas",
-  "short_name": "GSEA",
+  "name": "MANWE",
+  "short_name": "MW",
   "icons": [
     {
-      "src": "https://res.cloudinary.com/dsci2gspy/image/upload/v1755808728/android-chrome-192x192_po653a.png",
+      "src": "https://res.cloudinary.com/dsci2gspy/image/upload/v1756137912/android-chrome-192x192_dyojom.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://res.cloudinary.com/dsci2gspy/image/upload/v1755809009/android-chrome-512x512_ovmktl.png",
+      "src": "https://res.cloudinary.com/dsci2gspy/image/upload/v1756137874/android-chrome-512x512_ipoecr.png",
       "sizes": "512x512",
       "type": "image/png"
     }
