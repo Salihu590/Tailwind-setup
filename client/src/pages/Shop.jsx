@@ -8,13 +8,13 @@ import Header from "../components/navigation/Header";
 const logoUrl =
   "https://res.cloudinary.com/dsci2gspy/image/upload/v1756147657/WhatsApp_Image_2025-08-25_at_16.51.47_c686c776_aebbpo.jpg";
 
-
 const categories = ["New", "Tops / Jerseys", "Bottoms", "Shorts", "Womens"];
 
 export default function Shop() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("New");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
@@ -26,15 +26,15 @@ export default function Shop() {
     setMenuOpen(false);
   };
 
-  
-  const filteredProducts =
-    selectedCategory.toLowerCase() === "new"
-      ? products
-      : products.filter(
-          (p) =>
-            p.category.trim().toLowerCase() ===
-            selectedCategory.trim().toLowerCase()
-        );
+  const filteredProducts = products.filter((p) => {
+    const matchesCategory =
+      selectedCategory.toLowerCase() === "new" ||
+      p.category.trim().toLowerCase() === selectedCategory.trim().toLowerCase();
+    const matchesSearch = p.name
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   return (
     <div className="flex flex-col bg-black text-white min-h-screen">
@@ -42,10 +42,11 @@ export default function Shop() {
         toggleMenu={toggleMenu}
         toggleSearch={toggleSearch}
         searchOpen={searchOpen}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
       />
 
       <div className="flex flex-1">
-        
         <aside className="hidden lg:flex flex-col justify-between w-64 p-6 font-mono uppercase text-sm border-r border-gray-800 h-screen sticky top-0">
           <div className="space-y-4">
             <div className="flex justify-center">
@@ -68,7 +69,6 @@ export default function Shop() {
             ))}
           </div>
 
-          
           <div className="flex flex-col items-center mt-12 mb-4">
             <div className="flex gap-4 mb-6">
               <a
@@ -108,7 +108,6 @@ export default function Shop() {
           </div>
         </aside>
 
-       
         {menuOpen && (
           <div className="lg:hidden fixed inset-0 w-full h-full bg-black bg-opacity-95 p-6 z-50 flex flex-col justify-between animate-slide-in-left">
             <button
@@ -182,7 +181,6 @@ export default function Shop() {
           </div>
         )}
 
-        
         <main className="flex-1 w-full p-8 pt-20 lg:pt-8">
           <ProductGrid products={filteredProducts} />
         </main>
