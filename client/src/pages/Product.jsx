@@ -10,6 +10,7 @@ export default function Product() {
   const product = products.find((p) => p.id === parseInt(id));
   const [selectedSize, setSelectedSize] = useState("");
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [confirmationMessage, setConfirmationMessage] = useState("");
 
   const { addToCart } = useCart();
 
@@ -56,10 +57,16 @@ export default function Product() {
       size: selectedSize,
       image: product.images[currentImageIndex],
     });
+
+    setConfirmationMessage(`${product.name} added to cart`);
+
+    setTimeout(() => {
+      setConfirmationMessage("");
+    }, 3000);
   };
 
   return (
-    <div className="bg-black text-white min-h-screen p-8 flex flex-col lg:flex-row gap-12">
+    <div className="bg-black text-white min-h-screen p-8 flex flex-col lg:flex-row gap-12 relative">
       <div className="flex-1 flex items-center justify-center relative">
         <div {...swipeHandlers} className="w-full max-w-md">
           <img
@@ -142,6 +149,19 @@ export default function Product() {
         >
           Add to Cart
         </button>
+      </div>
+
+      <div
+        className={`fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50
+          transition-opacity duration-300 ${
+            confirmationMessage
+              ? "opacity-100"
+              : "opacity-0 pointer-events-none"
+          }`}
+      >
+        <div className="bg-gray-800 text-white px-6 py-3 rounded-full shadow-lg">
+          {confirmationMessage}
+        </div>
       </div>
     </div>
   );

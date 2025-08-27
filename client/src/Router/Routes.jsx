@@ -3,7 +3,8 @@ import Shop from "../pages/Shop";
 import Product from "../pages/Product";
 import Cart from "../pages/Cart";
 import Checkout from "../pages/Checkout";
-import ShippingOptions from "../pages/ShippingOptions"; // Import the new component
+import ShippingOptions from "../pages/ShippingOptions";
+import Payment from "../pages/Payment"; 
 import Terms from "../pages/Terms";
 import { Routes, Route } from "react-router-dom";
 
@@ -15,7 +16,8 @@ export default function AppRoutes() {
         <Route path="product/:id" element={<Product />} />
         <Route path="cart" element={<Cart />} />
         <Route path="checkout" element={<Checkout />} />
-        <Route path="checkout/shipping" element={<ShippingOptions />} /> {/* Add the new shipping route */}
+        <Route path="checkout/shipping" element={<ShippingOptions />} />
+        <Route path="checkout/payment" element={<Payment />} /> 
         <Route path="terms" element={<Terms />} />
       </Route>
     </Routes>

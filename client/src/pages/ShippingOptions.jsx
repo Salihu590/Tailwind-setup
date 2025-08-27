@@ -24,7 +24,7 @@ const shippingRates = [
 ];
 
 export default function ShippingOptions() {
-  const { cartItems } = useCart();
+  const { cartItems, checkoutData } = useCart();
   const [selectedShipping, setSelectedShipping] = useState(shippingRates[0].id);
 
   const subtotal = cartItems.reduce(
@@ -35,6 +35,10 @@ export default function ShippingOptions() {
     (rate) => rate.id === selectedShipping
   );
   const total = subtotal + (selectedRate ? selectedRate.cost : 0);
+
+  const deliveryAddress = checkoutData.address
+    ? `${checkoutData.address}, ${checkoutData.city}, ${checkoutData.state}, ${checkoutData.country}`
+    : "N/A";
 
   return (
     <div className="bg-white min-h-screen lg:flex lg:justify-center p-4 lg:p-10">
@@ -79,7 +83,7 @@ export default function ShippingOptions() {
         </div>
 
         <Link
-          to="/payment"
+          to="/checkout/payment" // CORRECTED PATH
           className="mt-6 w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition-colors block text-center"
         >
           Continue to payment
@@ -90,6 +94,24 @@ export default function ShippingOptions() {
         <h2 className="text-xl font-semibold text-gray-800 mb-4">
           Order summary
         </h2>
+        
+        {/* New section for customer information */}
+        <div className="border-b border-gray-300 pb-4 mb-4">
+          <h3 className="text-lg font-bold text-gray-800 mb-2">Customer Information</h3>
+          <p className="text-sm text-gray-600">
+            <strong>Name:</strong> {checkoutData.firstName} {checkoutData.lastName}
+          </p>
+          <p className="text-sm text-gray-600">
+            <strong>Email:</strong> {checkoutData.email}
+          </p>
+          <p className="text-sm text-gray-600">
+            <strong>Phone:</strong> {checkoutData.phone}
+          </p>
+          <p className="text-sm text-gray-600 mt-2">
+            <strong>Delivery Location:</strong> {deliveryAddress}
+          </p>
+        </div>
+
         <div className="space-y-4">
           {cartItems.map((item) => (
             <div key={item.id + item.size} className="flex items-start gap-4">

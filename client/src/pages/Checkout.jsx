@@ -4,51 +4,26 @@ import { Link, useNavigate } from "react-router-dom";
 
 const statesByCountry = {
   Nigeria: [
-    "Abia",
-    "Adamawa",
-    "Akwa Ibom",
-    "Anambra",
-    "Bauchi",
-    "Bayelsa",
-    "Benue",
-    "Borno",
-    "Cross River",
-    "Delta",
-    "Ebonyi",
-    "Edo",
-    "Ekiti",
-    "Enugu",
-    "FCT (Abuja)",
-    "Gombe",
-    "Imo",
-    "Jigawa",
-    "Kaduna",
-    "Kano",
-    "Katsina",
-    "Kebbi",
-    "Kogi",
-    "Kwara",
-    "Lagos",
-    "Nasarawa",
-    "Niger",
-    "Ogun",
-    "Ondo",
-    "Osun",
-    "Oyo",
-    "Plateau",
-    "Rivers",
-    "Sokoto",
-    "Taraba",
-    "Yobe",
-    "Zamfara",
+    "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue",
+    "Borno", "Cross River", "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu",
+    "FCT (Abuja)", "Gombe", "Imo", "Jigawa", "Kaduna", "Kano", "Katsina",
+    "Kebbi", "Kogi", "Kwara", "Lagos", "Nasarawa", "Niger", "Ogun", "Ondo",
+    "Osun", "Oyo", "Plateau", "Rivers", "Sokoto", "Taraba", "Yobe", "Zamfara",
   ],
   UK: ["England", "Scotland", "Wales", "Northern Ireland"],
   Ghana: ["Ashanti", "Greater Accra", "Northern", "Volta", "Western"],
 };
 
+const countryCodes = {
+  Nigeria: "+234",
+  UK: "+44",
+  Ghana: "+233",
+  Other: ""
+};
+
 export default function Checkout() {
-  const { cartItems } = useCart();
-  const navigate = useNavigate(); // Hook for programmatic navigation
+  const { cartItems, updateCheckoutData } = useCart();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -58,13 +33,12 @@ export default function Checkout() {
     country: "Nigeria",
     state: "",
     phone: "",
+    email: ""
   });
 
-  const subtotal = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
+  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const states = statesByCountry[formData.country] || [];
+  const phoneCode = countryCodes[formData.country] || "";
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
@@ -76,12 +50,22 @@ export default function Checkout() {
       !formData.city ||
       !formData.country ||
       !formData.state ||
-      !formData.phone
+      !formData.phone ||
+      !formData.email
     ) {
       alert("Please fill in all required fields.");
       return;
     }
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+        alert("Please enter a valid email address.");
+        return;
+    }
 
+    // Save the form data to the context before navigating
+    updateCheckoutData(formData);
+    
     navigate("/checkout/shipping");
   };
 
@@ -97,9 +81,17 @@ export default function Checkout() {
         <h1 className="text-2xl font-bold text-black mb-6">Checkout</h1>
 
         <form onSubmit={handleFormSubmit} className="space-y-4">
-          <h2 className="text-xl font-semibold text-gray-800">
-            Shipping Address
-          </h2>
+          <h2 className="text-xl font-semibold text-gray-800">Shipping Address</h2>
+          
+          <input
+            type="email"
+            placeholder="Email"
+            name="email"
+            value={formData.email}
+            onChange={handleInputChange}
+            className="border p-3 rounded-lg w-full text-black"
+            required
+          />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <input
@@ -163,9 +155,7 @@ export default function Checkout() {
               >
                 <option value="">Select state/region</option>
                 {states.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
+                  <option key={s} value={s}>{s}</option>
                 ))}
               </select>
             ) : (
@@ -200,15 +190,22 @@ export default function Checkout() {
             />
           </div>
 
-          <input
-            type="tel"
-            placeholder="Phone"
-            name="phone"
-            value={formData.phone}
-            onChange={handleInputChange}
-            className="border p-3 rounded-lg w-full text-black"
-            required
-          />
+          <div className="relative">
+            {phoneCode && (
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                {phoneCode}
+              </span>
+            )}
+            <input
+              type="tel"
+              placeholder="Phone number"
+              name="phone"
+              value={formData.phone}
+              onChange={handleInputChange}
+              className={`border p-3 rounded-lg w-full text-black ${phoneCode ? "pl-12" : ""}`}
+              required
+            />
+          </div>
 
           <button
             type="submit"
@@ -219,10 +216,9 @@ export default function Checkout() {
         </form>
       </div>
 
+      {/* Order Summary */}
       <div className="lg:w-1/2 p-6 lg:p-10 bg-gray-50 border-t lg:border-t-0 lg:border-l border-gray-200 mt-6 lg:mt-0">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">
-          Order summary
-        </h2>
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">Order summary</h2>
         <div className="space-y-4">
           {cartItems.map((item) => (
             <div key={item.id + item.size} className="flex items-start gap-4">
@@ -234,13 +230,9 @@ export default function Checkout() {
               <div className="flex-1">
                 <h3 className="text-md font-medium text-black">{item.name}</h3>
                 <p className="text-sm text-gray-500">Size: {item.size}</p>
-                <p className="text-sm text-gray-500">
-                  Quantity: {item.quantity}
-                </p>
+                <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
               </div>
-              <p className="text-black font-semibold">
-                ₦{(item.price * item.quantity).toLocaleString()}
-              </p>
+              <p className="text-black font-semibold">₦{(item.price * item.quantity).toLocaleString()}</p>
             </div>
           ))}
         </div>
@@ -256,9 +248,7 @@ export default function Checkout() {
           </div>
           <div className="flex justify-between items-center text-black mt-4">
             <span className="text-xl font-bold">Total</span>
-            <span className="text-xl font-bold">
-              ₦{subtotal.toLocaleString()}
-            </span>
+            <span className="text-xl font-bold">₦{subtotal.toLocaleString()}</span>
           </div>
         </div>
       </div>
