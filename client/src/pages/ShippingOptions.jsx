@@ -83,7 +83,7 @@ export default function ShippingOptions() {
         </div>
 
         <Link
-          to="/checkout/payment" // CORRECTED PATH
+          to="/checkout/payment"
           className="mt-6 w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition-colors block text-center"
         >
           Continue to payment
@@ -94,12 +94,14 @@ export default function ShippingOptions() {
         <h2 className="text-xl font-semibold text-gray-800 mb-4">
           Order summary
         </h2>
-        
-        {/* New section for customer information */}
+
         <div className="border-b border-gray-300 pb-4 mb-4">
-          <h3 className="text-lg font-bold text-gray-800 mb-2">Customer Information</h3>
+          <h3 className="text-lg font-bold text-gray-800 mb-2">
+            Customer Information
+          </h3>
           <p className="text-sm text-gray-600">
-            <strong>Name:</strong> {checkoutData.firstName} {checkoutData.lastName}
+            <strong>Name:</strong> {checkoutData.firstName}{" "}
+            {checkoutData.lastName}
           </p>
           <p className="text-sm text-gray-600">
             <strong>Email:</strong> {checkoutData.email}

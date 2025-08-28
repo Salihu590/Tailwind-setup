@@ -43,7 +43,8 @@ const products = [
     name: "MW BABY TEE",
     price: 0,
     images: [
-      "https://res.cloudinary.com/dsci2gspy/image/upload/v1756229125/WhatsApp_Image_2025-08-26_at_18.24.24_d59842f8_hch5jb.jpg",
+      "https://res.cloudinary.com/dsci2gspy/image/upload/v1756390975/WhatsApp_Image_2025-08-28_at_15.19.16_ae0747a6_ogxmfp.jpg",
+      "https://res.cloudinary.com/dsci2gspy/image/upload/v1756229125/WhatsApp_Image_2025-08-26_at_18.24.24_d59842f8_hch5jb.jpg"
     ],
     category: "Womens",
     description: "Trendy fitted baby tee, designed to elevate any casual look.",

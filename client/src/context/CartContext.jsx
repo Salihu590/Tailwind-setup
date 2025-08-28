@@ -7,7 +7,7 @@ export function CartProvider({ children }) {
     const saved = localStorage.getItem("cartItems");
     return saved ? JSON.parse(saved) : [];
   });
-  // New state to hold checkout form data
+
   const [checkoutData, setCheckoutData] = useState(() => {
     const saved = localStorage.getItem("checkoutData");
     return saved ? JSON.parse(saved) : {};
@@ -17,7 +17,6 @@ export function CartProvider({ children }) {
     localStorage.setItem("cartItems", JSON.stringify(cartItems));
   }, [cartItems]);
 
-  // Use useEffect to save checkout data to localStorage
   useEffect(() => {
     localStorage.setItem("checkoutData", JSON.stringify(checkoutData));
   }, [checkoutData]);
@@ -57,7 +56,6 @@ export function CartProvider({ children }) {
 
   const clearCart = () => setCartItems([]);
 
-  // New function to update the checkout data
   const updateCheckoutData = (data) => {
     setCheckoutData(data);
   };
@@ -70,8 +68,8 @@ export function CartProvider({ children }) {
         removeFromCart,
         updateQuantity,
         clearCart,
-        checkoutData, // Expose the checkout data
-        updateCheckoutData, // Expose the function to update it
+        checkoutData,
+        updateCheckoutData,
       }}
     >
       {children}

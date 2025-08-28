@@ -26,34 +26,36 @@ const shippingRates = [
 ];
 
 const createOrderOnServer = async (orderData) => {
-  const response = await fetch('http://localhost:3001/api/orders', {
-    method: 'POST',
+  const response = await fetch("http://localhost:3001/api/orders", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify(orderData),
   });
 
   if (!response.ok) {
-    throw new Error('Failed to create order on the server.');
+    throw new Error("Failed to create order on the server.");
   }
 
   const data = await response.json();
   return data;
 };
 
-// New function to initialize a Paystack payment
 const initializePaystackPayment = async (paymentData) => {
-  const response = await fetch('http://localhost:3001/api/paystack/initialize', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(paymentData),
-  });
+  const response = await fetch(
+    "http://localhost:3001/api/paystack/initialize",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(paymentData),
+    }
+  );
 
   if (!response.ok) {
-    throw new Error('Failed to initialize Paystack payment.');
+    throw new Error("Failed to initialize Paystack payment.");
   }
 
   const data = await response.json();
@@ -81,9 +83,11 @@ export default function Payment() {
     const cartItemsText = cartItems
       .map(
         (item) =>
-          `📦 ${item.name} (${item.size ? item.size + ' - ' : ''}${item.color ? item.color : ''}) - ${
-            item.quantity
-          }x - NGN ${(item.price * item.quantity).toLocaleString()}`
+          `📦 ${item.name} (${item.size ? item.size + " - " : ""}${
+            item.color ? item.color : ""
+          }) - ${item.quantity}x - NGN ${(
+            item.price * item.quantity
+          ).toLocaleString()}`
       )
       .join("\n");
 
@@ -96,7 +100,9 @@ ${cartItemsText}
 DELIVERY INFO:
 Name: ${checkoutData.firstName} ${checkoutData.lastName}
 Phone: ${checkoutData.phone}
-Address: ${checkoutData.address}, ${checkoutData.city}, ${checkoutData.state}, ${checkoutData.country}
+Address: ${checkoutData.address}, ${checkoutData.city}, ${
+      checkoutData.state
+    }, ${checkoutData.country}
 
 🚚 Delivery Cost: NGN ${shippingCost.toLocaleString()}
 💰 Total Price: NGN ${total.toLocaleString()}
@@ -135,20 +141,22 @@ Order ID: ${id}`;
         total,
       };
 
-      const { orderId: uniqueOrderId } = await createOrderOnServer(orderDetails);
+      const { orderId: uniqueOrderId } = await createOrderOnServer(
+        orderDetails
+      );
       setOrderId(uniqueOrderId);
 
       if (selectedPayment === "paynow") {
-        // Handle Paystack payment here
         const paystackData = {
           email: checkoutData.email,
           amount: total,
           orderId: uniqueOrderId,
         };
-        const { authorization_url } = await initializePaystackPayment(paystackData);
+        const { authorization_url } = await initializePaystackPayment(
+          paystackData
+        );
         window.open(authorization_url, "_blank");
       } else if (selectedPayment === "whatsapp") {
-        // ... (existing WhatsApp code)
         const message = generateMessage(uniqueOrderId);
         const encodedMessage = encodeURIComponent(message);
         const whatsappNumber = "2348051749331";
@@ -157,7 +165,6 @@ Order ID: ${id}`;
           "_blank"
         );
       } else if (selectedPayment === "instagram") {
-        // ... (existing Instagram code)
         const message = generateMessage(uniqueOrderId);
         try {
           await navigator.clipboard.writeText(message);
@@ -199,7 +206,6 @@ Order ID: ${id}`;
   };
 
   return (
-    // ... (rest of your return JSX, it stays the same)
     <div className="bg-white min-h-screen lg:flex lg:justify-center p-4 lg:p-10">
       <div className="lg:w-1/2 p-6 lg:border-r lg:border-gray-200">
         <h1 className="text-2xl font-bold text-black mb-6">Order Summary</h1>
