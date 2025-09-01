@@ -79,21 +79,21 @@ export default function Shop() {
                 <FaTiktok className="text-xl hover:text-gray-400 transition" />
               </a>
               <a
-                href="https://wa.me/2341234567890"
+                href="https://wa.me/2349162407757"
                 target="_blank"
                 rel="noreferrer"
               >
                 <FaWhatsapp className="text-xl hover:text-gray-400 transition" />
               </a>
               <a
-                href="https://www.instagram.com/manwe_official"
+                href="https://www.instagram.com/mw.civ?igsh=MXZlM3JhZXllZXZpcQ=="
                 target="_blank"
                 rel="noreferrer"
               >
                 <FaInstagram className="text-xl hover:text-gray-400 transition" />
               </a>
               <a
-                href="https://x.com/manwe_official"
+                href="https://x.com/manwe_jr?t=F7pDcNfp5cdJDEXJd7Y9Lw&s=09"
                 target="_blank"
                 rel="noreferrer"
               >
@@ -151,21 +151,21 @@ export default function Shop() {
                   <FaTiktok className="text-2xl hover:text-gray-400 transition" />
                 </a>
                 <a
-                  href="https://wa.me/2341234567890"
+                  href="https://wa.me/2349162407757"
                   target="_blank"
                   rel="noreferrer"
                 >
                   <FaWhatsapp className="text-2xl hover:text-gray-400 transition" />
                 </a>
                 <a
-                  href="https://www.instagram.com/manwe_official"
+                  href="https://www.instagram.com/mw.civ?igsh=MXZlM3JhZXllZXZpcQ=="
                   target="_blank"
                   rel="noreferrer"
                 >
                   <FaInstagram className="text-2xl hover:text-gray-400 transition" />
                 </a>
                 <a
-                  href="https://x.com/manwe_official"
+                  href="https://x.com/manwe_jr?t=F7pDcNfp5cdJDEXJd7Y9Lw&s=09"
                   target="_blank"
                   rel="noreferrer"
                 >
