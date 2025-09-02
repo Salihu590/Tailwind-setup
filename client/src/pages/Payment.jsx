@@ -63,7 +63,7 @@ const initializePaystackPayment = async (paymentData) => {
 };
 
 export default function Payment() {
-  const { cartItems, checkoutData } = useCart();
+  const { cartItems, checkoutData, specialInstructions } = useCart();
   const [selectedPayment, setSelectedPayment] = useState("whatsapp");
   const [orderId, setOrderId] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -91,9 +91,14 @@ export default function Payment() {
       )
       .join("\n");
 
+    const specialInstructionsText = specialInstructions
+      ? `\n\n📝 SPECIAL INSTRUCTIONS:\n${specialInstructions}`
+      : "";
+
     const message = `Hi, I'd like to buy these items:
 
 ${cartItemsText}
+${specialInstructionsText}
 
 🙍🏽‍♂️ Customer: ${checkoutData.firstName} ${checkoutData.lastName}
 
@@ -137,6 +142,7 @@ Order ID: ${id}`;
       const orderDetails = {
         cartItems,
         checkoutData,
+        specialInstructions,
         shippingCost,
         total,
       };
@@ -373,6 +379,14 @@ Order ID: ${id}`;
               </p>
             </div>
           ))}
+          {specialInstructions && (
+            <div className="mt-4 pt-4 border-t border-gray-300">
+              <h3 className="text-md font-semibold text-gray-800 mb-2">
+                Special Instructions
+              </h3>
+              <p className="text-sm text-gray-600">{specialInstructions}</p>
+            </div>
+          )}
         </div>
         <div className="mt-6 pt-4 border-t border-gray-300">
           <div className="flex justify-between items-center text-gray-500">

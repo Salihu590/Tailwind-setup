@@ -97,12 +97,14 @@
       .hidden {
         display: none;
       }
-      .order-container, .customer-container {
+      .order-container,
+      .customer-container {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
         gap: 20px;
       }
-      .order-card, .customer-card {
+      .order-card,
+      .customer-card {
         background-color: var(--main-bg);
         border: 1px solid var(--border-color);
         border-radius: 8px;
@@ -111,21 +113,26 @@
         transition: transform 0.2s;
         cursor: pointer;
       }
-      .order-card:hover, .customer-card:hover {
+      .order-card:hover,
+      .customer-card:hover {
         transform: translateY(-5px);
       }
-      .order-card h3, .customer-card h3 {
+      .order-card h3,
+      .customer-card h3 {
         margin-top: 0;
         color: var(--accent-color);
       }
-      .order-card p, .customer-card p {
+      .order-card p,
+      .customer-card p {
         margin: 5px 0;
         font-size: 14px;
       }
-      .order-card ul, .customer-card ul {
+      .order-card ul,
+      .customer-card ul {
         padding-left: 20px;
       }
-      .order-card li, .customer-card li {
+      .order-card li,
+      .customer-card li {
         font-size: 14px;
       }
       .status-badge {
@@ -147,7 +154,7 @@
         background-color: #21f32c;
       }
       .status-badge.confirmed {
-        background-color: #2196F3;
+        background-color: #2196f3;
       }
       .status-badge.delivered {
         background-color: #757575;
@@ -184,28 +191,29 @@
         align-self: center;
       }
       .toolbar {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 15px;
-          margin-bottom: 20px;
-          flex-wrap: wrap;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
       }
-      .toolbar input, .toolbar select {
-          padding: 10px;
-          border: 1px solid var(--border-color);
-          border-radius: 5px;
-          font-size: 16px;
-          flex-grow: 1;
+      .toolbar input,
+      .toolbar select {
+        padding: 10px;
+        border: 1px solid var(--border-color);
+        border-radius: 5px;
+        font-size: 16px;
+        flex-grow: 1;
       }
       .toolbar button {
-          padding: 10px 20px;
-          background-color: var(--accent-color);
-          color: #fff;
-          border: none;
-          border-radius: 5px;
-          cursor: pointer;
-          font-weight: 600;
+        padding: 10px 20px;
+        background-color: var(--accent-color);
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: 600;
       }
       .metrics-container {
         display: grid;
@@ -238,7 +246,7 @@
         width: 100%;
         height: 100%;
         overflow: auto;
-        background-color: rgba(0,0,0,0.6);
+        background-color: rgba(0, 0, 0, 0.6);
         justify-content: center;
         align-items: center;
       }
@@ -249,7 +257,7 @@
         background-color: var(--main-bg);
         padding: 30px;
         border-radius: 8px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         max-width: 600px;
         width: 90%;
         position: relative;
@@ -285,6 +293,21 @@
         cursor: pointer;
       }
       .view-toggle button.active {
+        background-color: var(--accent-color);
+        color: #fff;
+      }
+      .order-type-toggle {
+        margin-top: 10px;
+        margin-bottom: 15px;
+      }
+      .order-type-toggle button {
+        padding: 8px 16px;
+        border: 1px solid var(--border-color);
+        border-radius: 5px;
+        background-color: var(--main-bg);
+        cursor: pointer;
+      }
+      .order-type-toggle button.active {
         background-color: var(--accent-color);
         color: #fff;
       }
@@ -327,10 +350,60 @@
         font-size: 14px;
       }
       .product-rank {
-          font-size: 1.5em;
-          font-weight: 700;
-          color: var(--accent-color);
-          margin-right: 15px;
+        font-size: 1.5em;
+        font-weight: 700;
+        color: var(--accent-color);
+        margin-right: 15px;
+      }
+
+      /* Responsive fixes for small devices */
+      @media screen and (max-width: 480px) {
+        body {
+          padding: 10px;
+        }
+        .header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 10px;
+          padding: 10px 0;
+        }
+        .header h1 {
+          font-size: 1.2em;
+          width: 100%;
+          text-align: left;
+        }
+        .logout-button {
+          align-self: flex-end;
+          padding: 8px 16px;
+          font-size: 14px;
+        }
+        .toolbar {
+          flex-direction: column;
+          align-items: stretch;
+          gap: 10px;
+        }
+        .toolbar input,
+        .toolbar select,
+        .toolbar button {
+          width: 100%;
+          flex-grow: unset;
+        }
+        .view-toggle {
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+        .order-type-toggle {
+          justify-content: center;
+        }
+        .metrics-container {
+          grid-template-columns: 1fr;
+          gap: 10px;
+        }
+        .order-container,
+        .customer-container {
+          grid-template-columns: 1fr;
+          gap: 10px;
+        }
       }
     </style>
   </head>
@@ -361,7 +434,7 @@
 
       <div id="dashboard-container" class="container hidden">
         <div class="header">
-          <h1>Admin Dashboard</h1>
+          <h1 id="dashboard-header">Admin Dashboard</h1>
           <button id="logout-button" class="logout-button">Logout</button>
         </div>
 
@@ -383,57 +456,84 @@
             <p id="orders-to-ship-metric">0</p>
           </div>
         </div>
-        
+
         <div class="view-toggle">
-            <button id="orders-view-btn" class="active">Orders</button>
-            <button id="customers-view-btn">Customers</button>
-            <button id="revenue-view-btn">Revenue</button>
-            <button id="top-products-view-btn">Top Products</button>
+          <button id="orders-view-btn" class="active">Orders</button>
+          <button id="customers-view-btn">Customers</button>
+          <button id="revenue-view-btn">Revenue</button>
+          <button id="top-products-view-btn">Top Products</button>
         </div>
 
         <div id="main-content-area">
           <div id="orders-section">
-              <div class="toolbar">
-                  <input type="text" id="search-input" placeholder="Search by Order ID, Name, or Email" />
-                  <select id="payment-status-filter">
-                      <option value="">Payment Status (All)</option>
-                      <option value="paid">Paid</option>
-                      <option value="pending">Pending</option>
-                  </select>
-                  <select id="order-status-filter">
-                      <option value="">Order Status (All)</option>
-                      <option value="confirmed">Confirmed</option>
-                      <option value="shipped">Shipped</option>
-                      <option value="delivered">Delivered</option>
-                      <option value="pending">Pending</option>
-                  </select>
-                  <input type="date" id="start-date-filter" placeholder="Start Date" title="Start Date">
-                  <input type="date" id="end-date-filter" placeholder="End Date" title="End Date">
-                  <button id="clear-filters">Clear</button>
-              </div>
-              <div id="orders-list" class="order-container"></div>
+            <div class="toolbar">
+              <input
+                type="text"
+                id="search-input"
+                placeholder="Search by Order ID, Name, or Email"
+              />
+              <select id="payment-status-filter">
+                <option value="">Payment Status (All)</option>
+                <option value="paid">Paid</option>
+                <option value="pending">Pending</option>
+              </select>
+              <select id="order-status-filter">
+                <option value="">Order Status (All)</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="shipped">Shipped</option>
+                <option value="delivered">Delivered</option>
+                <option value="pending">Pending</option>
+              </select>
+              <input
+                type="date"
+                id="start-date-filter"
+                placeholder="Start Date"
+                title="Start Date"
+              />
+              <input
+                type="date"
+                id="end-date-filter"
+                placeholder="End Date"
+                title="End Date"
+              />
+              <button id="clear-filters">Clear</button>
+            </div>
+            <div class="view-toggle order-type-toggle">
+              <button id="active-orders-btn" class="active">
+                Active Orders
+              </button>
+              <button id="archived-orders-btn">Archived Orders</button>
+            </div>
+            <div id="orders-list" class="order-container"></div>
           </div>
-          
+
           <div id="customers-section" class="hidden">
-              <div class="toolbar">
-                   <input type="text" id="customer-search-input" placeholder="Search by Name or Email" />
-                   <button id="clear-customer-filters">Clear</button>
-              </div>
-              <div id="customers-list" class="customer-container"></div>
+            <div class="toolbar">
+              <input
+                type="text"
+                id="customer-search-input"
+                placeholder="Search by Name or Email"
+              />
+              <button id="clear-customer-filters">Clear</button>
+            </div>
+            <div id="customers-list" class="customer-container"></div>
           </div>
 
           <div id="revenue-report-container" class="report-container hidden">
-              <h3>Revenue Over Time</h3>
-              <canvas id="revenue-chart"></canvas>
+            <h3>Revenue Over Time</h3>
+            <canvas id="revenue-chart"></canvas>
           </div>
-          
-          <div id="top-products-report-container" class="report-container hidden">
-              <h3>Top 5 Selling Products</h3>
-              <div id="top-products-list"></div>
+
+          <div
+            id="top-products-report-container"
+            class="report-container hidden"
+          >
+            <h3>Top 5 Selling Products</h3>
+            <div id="top-products-list"></div>
           </div>
         </div>
       </div>
-      
+
       <div id="order-details-modal" class="modal hidden">
         <div class="modal-content">
           <span class="close-button">&times;</span>

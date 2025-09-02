@@ -54,7 +54,7 @@ const countryCodes = {
 };
 
 export default function Checkout() {
-  const { cartItems, updateCheckoutData } = useCart();
+  const { cartItems, updateCheckoutData, specialInstructions } = useCart();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -279,6 +279,15 @@ export default function Checkout() {
               </p>
             </div>
           ))}
+
+          {specialInstructions && (
+            <div className="mt-4 pt-4 border-t border-gray-300">
+              <h3 className="text-md font-semibold text-gray-800 mb-2">
+                Special Instructions
+              </h3>
+              <p className="text-sm text-gray-600">{specialInstructions}</p>
+            </div>
+          )}
         </div>
 
         <div className="mt-6 pt-4 border-t border-gray-300">

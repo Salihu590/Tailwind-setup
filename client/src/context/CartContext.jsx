@@ -1,49 +1,75 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
+
+const CART_STORAGE_KEY = "cartItems";
+const CHECKOUT_STORAGE_KEY = "checkoutData";
+const INSTRUCTIONS_STORAGE_KEY = "specialInstructions";
 
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
-  const [cartItems, setCartItems] = useState(() => {
-    const saved = localStorage.getItem("cartItems");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const getLocalStorageItem = (key, defaultValue) => {
+    try {
+      const saved = localStorage.getItem(key);
+      return saved ? JSON.parse(saved) : defaultValue;
+    } catch (error) {
+      console.error("Failed to parse localStorage data:", error);
+      return defaultValue;
+    }
+  };
 
-  const [checkoutData, setCheckoutData] = useState(() => {
-    const saved = localStorage.getItem("checkoutData");
-    return saved ? JSON.parse(saved) : {};
-  });
+  const [cartItems, setCartItems] = useState(() =>
+    getLocalStorageItem(CART_STORAGE_KEY, [])
+  );
+  const [checkoutData, setCheckoutData] = useState(() =>
+    getLocalStorageItem(CHECKOUT_STORAGE_KEY, {})
+  );
+
+  const [specialInstructions, setSpecialInstructions] = useState(() =>
+    getLocalStorageItem(INSTRUCTIONS_STORAGE_KEY, "")
+  );
 
   useEffect(() => {
-    localStorage.setItem("cartItems", JSON.stringify(cartItems));
-  }, [cartItems]);
-
-  useEffect(() => {
-    localStorage.setItem("checkoutData", JSON.stringify(checkoutData));
-  }, [checkoutData]);
-
-  const addToCart = (product) => {
+    try {
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
+      localStorage.setItem(CHECKOUT_STORAGE_KEY, JSON.stringify(checkoutData));
+      localStorage.setItem(
+        INSTRUCTIONS_STORAGE_KEY,
+        JSON.stringify(specialInstructions)
+      );
+    } catch (error) {
+      console.error("Failed to save data to localStorage:", error);
+    }
+  }, [cartItems, checkoutData, specialInstructions]);
+  const addToCart = useCallback((product) => {
     setCartItems((prev) => {
-      const existing = prev.find(
+      const existingItemIndex = prev.findIndex(
         (item) => item.id === product.id && item.size === product.size
       );
-      if (existing) {
-        return prev.map((item) =>
-          item.id === product.id && item.size === product.size
+
+      if (existingItemIndex > -1) {
+        return prev.map((item, index) =>
+          index === existingItemIndex
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
       }
       return [...prev, { ...product, quantity: 1 }];
     });
-  };
+  }, []);
 
-  const removeFromCart = (id, size) => {
+  const removeFromCart = useCallback((id, size) => {
     setCartItems((prev) =>
       prev.filter((item) => !(item.id === id && item.size === size))
     );
-  };
+  }, []);
 
-  const updateQuantity = (id, size, newQuantity) => {
+  const updateQuantity = useCallback((id, size, newQuantity) => {
     if (newQuantity < 1) return;
     setCartItems((prev) =>
       prev.map((item) =>
@@ -52,13 +78,20 @@ export function CartProvider({ children }) {
           : item
       )
     );
-  };
+  }, []);
 
-  const clearCart = () => setCartItems([]);
+  const clearCart = useCallback(() => {
+    setCartItems([]);
+    setSpecialInstructions("");
+  }, []);
 
-  const updateCheckoutData = (data) => {
+  const updateCheckoutData = useCallback((data) => {
     setCheckoutData(data);
-  };
+  }, []);
+
+  const updateSpecialInstructions = useCallback((instructions) => {
+    setSpecialInstructions(instructions);
+  }, []);
 
   return (
     <CartContext.Provider
@@ -70,6 +103,8 @@ export function CartProvider({ children }) {
         clearCart,
         checkoutData,
         updateCheckoutData,
+        specialInstructions,
+        updateSpecialInstructions,
       }}
     >
       {children}

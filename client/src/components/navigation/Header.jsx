@@ -1,7 +1,7 @@
 import { FiShoppingCart } from "react-icons/fi";
 import { FaSearch } from "react-icons/fa";
 import { Menu } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
 
 const logoUrl =
@@ -14,6 +14,9 @@ export default function Header({
   searchQuery,
   setSearchQuery,
 }) {
+  const { pathname } = useLocation();
+  const isProductPage = pathname.startsWith("/product/");
+
   const { cartItems } = useCart();
   const cartCount = cartItems.reduce(
     (total, item) => total + (item.quantity || 1),
@@ -23,13 +26,15 @@ export default function Header({
   return (
     <header className="fixed top-0 left-0 w-full bg-black text-white z-40">
       <div className="flex items-center lg:hidden gap-4 p-4 w-full justify-between">
-        <button
-          onClick={toggleSearch}
-          className="text-white hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]"
-          aria-label={searchOpen ? "Close search" : "Open search"}
-        >
-          <FaSearch size={20} />
-        </button>
+        {!isProductPage && (
+          <button
+            onClick={toggleSearch}
+            className="text-white hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]"
+            aria-label={searchOpen ? "Close search" : "Open search"}
+          >
+            <FaSearch size={20} />
+          </button>
+        )}
 
         <Link to="/" aria-label="Home">
           <img src={logoUrl} alt="MANWE Logo" className="h-12" />
@@ -46,7 +51,7 @@ export default function Header({
               )}
             </div>
           </Link>
-
+          {/* The menu button is always visible now */}
           <button
             onClick={toggleMenu}
             className="text-white hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]"
@@ -57,7 +62,7 @@ export default function Header({
         </div>
       </div>
 
-      {searchOpen && (
+      {searchOpen && !isProductPage && (
         <div className="lg:hidden p-4 bg-black border-b border-gray-800">
           <input
             type="text"
@@ -76,14 +81,16 @@ export default function Header({
         </Link>
 
         <div className="flex items-center gap-6">
-          <input
-            type="text"
-            placeholder="Search"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-transparent border-b border-white text-sm px-2 py-1 focus:outline-none"
-            aria-label="Search products"
-          />
+          {!isProductPage && (
+            <input
+              type="text"
+              placeholder="Search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="bg-transparent border-b border-white text-sm px-2 py-1 focus:outline-none"
+              aria-label="Search products"
+            />
+          )}
 
           <Link
             to="/cart"
@@ -100,7 +107,6 @@ export default function Header({
             </div>
             Cart
           </Link>
-
           <Link
             to="/checkout"
             className="hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]"

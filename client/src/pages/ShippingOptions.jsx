@@ -24,7 +24,7 @@ const shippingRates = [
 ];
 
 export default function ShippingOptions() {
-  const { cartItems, checkoutData } = useCart();
+  const { cartItems, checkoutData, specialInstructions } = useCart();
   const [selectedShipping, setSelectedShipping] = useState(shippingRates[0].id);
 
   const subtotal = cartItems.reduce(
@@ -134,6 +134,15 @@ export default function ShippingOptions() {
               </p>
             </div>
           ))}
+
+          {specialInstructions && (
+            <div className="mt-4 pt-4 border-t border-gray-300">
+              <h3 className="text-md font-semibold text-gray-800 mb-2">
+                Special Instructions
+              </h3>
+              <p className="text-sm text-gray-600">{specialInstructions}</p>
+            </div>
+          )}
         </div>
 
         <div className="mt-6 pt-4 border-t border-gray-300">

@@ -3,9 +3,14 @@ import { useCart } from "../context/CartContext";
 import { Link } from "react-router-dom";
 
 export default function Cart() {
-  const { cartItems, removeFromCart, updateQuantity } = useCart();
+  const {
+    cartItems,
+    removeFromCart,
+    updateQuantity,
+    specialInstructions,
+    updateSpecialInstructions,
+  } = useCart();
 
-  const [instructions, setInstructions] = useState("");
   const [agree, setAgree] = useState(false);
 
   const total = cartItems.reduce(
@@ -63,11 +68,13 @@ export default function Cart() {
                             )
                           }
                           disabled={item.quantity <= 1}
-                          className="px-2 py-1 bg-gray-400 rounded-md hover:bg-gray-600 disabled:opacity-50"
+                          className="px-2 py-1 bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50 text-gray-800"
                         >
                           -
                         </button>
-                        <span>{item.quantity}</span>
+                        <span className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-200 text-gray-800 font-medium">
+                          {item.quantity}
+                        </span>
                         <button
                           onClick={() =>
                             updateQuantity(
@@ -76,7 +83,7 @@ export default function Cart() {
                               item.quantity + 1
                             )
                           }
-                          className="px-2 py-1 bg-gray-400 rounded-md hover:bg-gray-600"
+                          className="px-2 py-1 bg-gray-200 rounded-md hover:bg-gray-300 text-gray-800"
                         >
                           +
                         </button>
@@ -99,9 +106,9 @@ export default function Cart() {
                 Special Instructions for the Seller
               </label>
               <textarea
-                value={instructions}
-                onChange={(e) => setInstructions(e.target.value)}
-                placeholder="e.g., Please wrap as a gift,The order is a surprise gift.Please ensure the box has no brand logos on the outside, etc."
+                value={specialInstructions}
+                onChange={(e) => updateSpecialInstructions(e.target.value)}
+                placeholder="e.g., Please wrap as a gift."
                 className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-black focus:outline-none text-gray-800 placeholder-gray-400"
                 rows="3"
               />
@@ -126,8 +133,8 @@ export default function Cart() {
               </label>
             </div>
 
-            <div className="mt-6 flex items-center justify-between border-t pt-4">
-              <p className="text-xl font-bold text-gray-800">
+            <div className="mt-6 flex flex-col sm:flex-row items-center justify-between border-t pt-4">
+              <p className="text-xl font-bold text-gray-800 mb-4 sm:mb-0">
                 Total: ₦{total.toLocaleString()}
               </p>
               <Link
@@ -140,7 +147,7 @@ export default function Cart() {
                     );
                   }
                 }}
-                className={`px-6 py-3 rounded-xl transition whitespace-nowrap ${
+                className={`px-6 py-3 rounded-xl transition w-full sm:w-auto text-center ${
                   agree
                     ? "bg-black text-white hover:bg-gray-600"
                     : "bg-gray-400 text-gray-200 cursor-not-allowed"

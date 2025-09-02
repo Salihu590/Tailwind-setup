@@ -68,7 +68,7 @@ export default function Product() {
   return (
     <div className="bg-black text-white min-h-screen p-8 flex flex-col lg:flex-row gap-12 relative">
       <div className="flex-1 flex items-center justify-center relative">
-        <div {...swipeHandlers} className="w-full max-w-md">
+        <div {...swipeHandlers} className="w-full max-w-md relative">
           <img
             src={product.images[currentImageIndex]}
             alt={`${product.name} view ${currentImageIndex + 1}`}
@@ -78,6 +78,23 @@ export default function Product() {
                 "https://res.cloudinary.com/dsci2gspy/image/upload/v1756147657/WhatsApp_Image_2025-08-25_at_16.51.47_c686c776_aebbpo.jpg";
             }}
           />
+
+          {product.images.length > 1 && (
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex justify-center space-x-2">
+              {product.images.map((_, index) => (
+                <button
+                  key={`${product.id}-image-${index}`}
+                  onClick={() => setCurrentImageIndex(index)}
+                  className={`w-3 h-3 rounded-full ${
+                    currentImageIndex === index
+                      ? "bg-yellow-500"
+                      : "bg-gray-500"
+                  }`}
+                  aria-label={`View image ${index + 1}`}
+                ></button>
+              ))}
+            </div>
+          )}
         </div>
 
         {product.images.length > 1 && (
@@ -98,21 +115,6 @@ export default function Product() {
             </button>
           </div>
         )}
-
-        {product.images.length > 1 && (
-          <div className="flex justify-center mt-4 space-x-2">
-            {product.images.map((_, index) => (
-              <button
-                key={`${product.id}-image-${index}`}
-                onClick={() => setCurrentImageIndex(index)}
-                className={`w-3 h-3 rounded-full ${
-                  currentImageIndex === index ? "bg-yellow-500" : "bg-gray-500"
-                }`}
-                aria-label={`View image ${index + 1}`}
-              ></button>
-            ))}
-          </div>
-        )}
       </div>
 
       <div className="flex-1 flex flex-col justify-center space-y-6">
@@ -123,7 +125,14 @@ export default function Product() {
             currency: "NGN",
           })}
         </p>
-        <p className="text-gray-400">{product.description}</p>
+
+        <div className="text-gray-400 space-y-4">
+          {product.description.map((line, index) => (
+            <p key={index} className={index === 1 ? "font-bold" : ""}>
+              {line}
+            </p>
+          ))}
+        </div>
 
         <div>
           <label className="block text-sm text-gray-400 mb-2">
