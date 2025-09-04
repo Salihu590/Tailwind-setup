@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3001/api/admin";
+const API_URL = "https://tailwind-setup.onrender.com/api/admin";
 
 const app = document.getElementById("app");
 const loginFormContainer = document.getElementById("login-form-container");
