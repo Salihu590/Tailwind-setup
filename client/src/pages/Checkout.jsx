@@ -42,31 +42,29 @@ const statesByCountry = {
     "Yobe",
     "Zamfara",
   ],
-  UK: ["England", "Scotland", "Wales", "Northern Ireland"],
-  Ghana: ["Ashanti", "Greater Accra", "Northern", "Volta", "Western"],
 };
 
 const countryCodes = {
   Nigeria: "+234",
-  UK: "+44",
-  Ghana: "+233",
-  Other: "",
 };
 
 export default function Checkout() {
-  const { cartItems, updateCheckoutData, specialInstructions } = useCart();
+  const { cartItems, updateCheckoutData, specialInstructions, checkoutData } =
+    useCart();
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    address: "",
-    city: "",
-    country: "Nigeria",
-    state: "",
-    phone: "",
-    email: "",
-  });
+  const [formData, setFormData] = useState(
+    checkoutData || {
+      firstName: "",
+      lastName: "",
+      address: "",
+      city: "",
+      country: "Nigeria",
+      state: "",
+      phone: "",
+      email: "",
+    }
+  );
 
   const subtotal = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -98,14 +96,15 @@ export default function Checkout() {
       return;
     }
 
-    updateCheckoutData(formData);
-
     navigate("/checkout/shipping");
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({ ...prevData, [name]: value }));
+
+    const newFormData = { ...formData, [name]: value };
+    setFormData(newFormData);
+    updateCheckoutData(newFormData);
   };
 
   return (
@@ -115,7 +114,7 @@ export default function Checkout() {
 
         <form onSubmit={handleFormSubmit} className="space-y-4">
           <h2 className="text-xl font-semibold text-gray-800">
-            Shipping Address
+            Delivery Address
           </h2>
 
           <input
@@ -173,11 +172,9 @@ export default function Checkout() {
               onChange={handleInputChange}
               className="border p-3 rounded-lg w-full text-black"
               required
+              disabled
             >
               <option value="Nigeria">Nigeria</option>
-              <option value="UK">United Kingdom</option>
-              <option value="Ghana">Ghana</option>
-              <option value="Other">Other</option>
             </select>
 
             {states.length > 0 ? (
@@ -188,7 +185,7 @@ export default function Checkout() {
                 className="border p-3 rounded-lg w-full text-black"
                 required
               >
-                <option value="">Select state/region</option>
+                <option value="">Select state</option>
                 {states.map((s) => (
                   <option key={s} value={s}>
                     {s}
@@ -198,7 +195,7 @@ export default function Checkout() {
             ) : (
               <input
                 type="text"
-                placeholder="Region/Province"
+                placeholder="State"
                 name="state"
                 value={formData.state}
                 onChange={handleInputChange}
@@ -250,7 +247,7 @@ export default function Checkout() {
             type="submit"
             className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition-colors"
           >
-            Continue to shipping
+            Continue to delivery
           </button>
         </form>
       </div>
@@ -296,7 +293,7 @@ export default function Checkout() {
             <span className="font-semibold">₦{subtotal.toLocaleString()}</span>
           </div>
           <div className="flex justify-between items-center text-gray-500 text-sm mt-2">
-            <span>Shipping</span>
+            <span>Delivery fee</span>
             <span>Calculated at next step</span>
           </div>
           <div className="flex justify-between items-center text-black mt-4">

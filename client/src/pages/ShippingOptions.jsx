@@ -1,89 +1,94 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCart } from "../context/CartContext";
 import { Link } from "react-router-dom";
 
-const shippingRates = [
-  {
-    id: "standard",
-    name: "Standard Shipping",
-    cost: 2500,
-    estDelivery: "3-5 business days",
-  },
-  {
-    id: "express",
-    name: "Express Shipping",
-    cost: 5000,
-    estDelivery: "1-2 business days",
-  },
-  {
-    id: "free",
-    name: "Free Shipping",
-    cost: 0,
-    estDelivery: "7-10 business days",
-  },
-];
+const getDeliveryCost = (state) => {
+  const deliveryRates = {
+    "FCT (Abuja)": 6000,
+    Lagos: 9000,
+    Rivers: 10000,
+  };
+
+  if (deliveryRates.hasOwnProperty(state)) {
+    return deliveryRates[state];
+  } else {
+    return 4500;
+  }
+};
 
 export default function ShippingOptions() {
-  const { cartItems, checkoutData, specialInstructions } = useCart();
-  const [selectedShipping, setSelectedShipping] = useState(shippingRates[0].id);
+  const { cartItems, checkoutData, specialInstructions, updateDeliveryCost } =
+    useCart();
+
+  const deliveryState = checkoutData.state;
+
+  const deliveryCost = getDeliveryCost(deliveryState);
+
+  const [selectedDelivery, setSelectedDelivery] = useState({
+    id: "calculated",
+    name: "Standard Delivery",
+    cost: deliveryCost,
+    estDelivery: "3-7 business days",
+  });
+
+  useEffect(() => {
+    const newCost = getDeliveryCost(checkoutData.state);
+    setSelectedDelivery((prev) => ({ ...prev, cost: newCost }));
+  }, [checkoutData.state]);
 
   const subtotal = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
-  const selectedRate = shippingRates.find(
-    (rate) => rate.id === selectedShipping
-  );
-  const total = subtotal + (selectedRate ? selectedRate.cost : 0);
+
+  const total = subtotal + selectedDelivery.cost;
 
   const deliveryAddress = checkoutData.address
     ? `${checkoutData.address}, ${checkoutData.city}, ${checkoutData.state}, ${checkoutData.country}`
     : "N/A";
 
+  const handleContinue = () => {
+    updateDeliveryCost(selectedDelivery.cost);
+  };
+
   return (
     <div className="bg-white min-h-screen lg:flex lg:justify-center p-4 lg:p-10">
       <div className="lg:w-1/2 p-6 lg:border-r lg:border-gray-200">
-        <h1 className="text-2xl font-bold text-black mb-6">Shipping</h1>
+        <h1 className="text-2xl font-bold text-black mb-6">Delivery</h1>
 
         <h2 className="text-xl font-semibold text-gray-800 mb-4">
-          Shipping Method
+          Delivery Method
         </h2>
 
-        <div className="space-y-4">
-          {shippingRates.map((rate) => (
-            <div
-              key={rate.id}
-              onClick={() => setSelectedShipping(rate.id)}
-              className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-colors ${
-                selectedShipping === rate.id
-                  ? "border-black bg-gray-100"
-                  : "border-gray-300 hover:bg-gray-50"
-              }`}
-            >
-              <div className="flex items-center">
-                <input
-                  type="radio"
-                  id={rate.id}
-                  name="shipping-rate"
-                  value={rate.id}
-                  checked={selectedShipping === rate.id}
-                  readOnly
-                  className="mr-3 text-black"
-                />
-                <label htmlFor={rate.id} className="text-gray-800">
-                  <span className="font-medium">{rate.name}</span>
-                  <p className="text-sm text-gray-500">{rate.estDelivery}</p>
-                </label>
-              </div>
-              <span className="font-semibold text-black">
-                {rate.cost === 0 ? "Free" : `₦${rate.cost.toLocaleString()}`}
-              </span>
-            </div>
-          ))}
+        <div
+          onClick={() => {}}
+          className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer border-black bg-gray-100`}
+        >
+          <div className="flex items-center">
+            <input
+              type="radio"
+              id={selectedDelivery.id}
+              name="delivery-rate"
+              value={selectedDelivery.id}
+              checked={true}
+              readOnly
+              className="mr-3 text-black"
+            />
+            <label htmlFor={selectedDelivery.id} className="text-gray-800">
+              <span className="font-medium">{selectedDelivery.name}</span>
+              <p className="text-sm text-gray-500">
+                {selectedDelivery.estDelivery}
+              </p>
+            </label>
+          </div>
+          <span className="font-semibold text-black">
+            ₦{selectedDelivery.cost.toLocaleString()}
+          </span>
         </div>
 
         <Link
           to="/checkout/payment"
+          onClick={handleContinue}
           className="mt-6 w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition-colors block text-center"
         >
           Continue to payment
@@ -151,11 +156,9 @@ export default function ShippingOptions() {
             <span className="font-semibold">₦{subtotal.toLocaleString()}</span>
           </div>
           <div className="flex justify-between items-center text-black mt-2">
-            <span>Shipping</span>
+            <span>Delivery fee</span>
             <span className="font-semibold">
-              {selectedRate.cost === 0
-                ? "Free"
-                : `₦${selectedRate.cost.toLocaleString()}`}
+              ₦{selectedDelivery.cost.toLocaleString()}
             </span>
           </div>
           <div className="flex justify-between items-center text-black mt-4">

@@ -4,35 +4,31 @@ import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const shippingRates = [
-  {
-    id: "standard",
-    name: "Standard Shipping",
-    cost: 2500,
-    estDelivery: "3-5 business days",
-  },
-  {
-    id: "express",
-    name: "Express Shipping",
-    cost: 5000,
-    estDelivery: "1-2 business days",
-  },
-  {
-    id: "free",
-    name: "Free Shipping",
-    cost: 0,
-    estDelivery: "7-10 business days",
-  },
-];
+const getDeliveryCost = (state) => {
+  const deliveryRates = {
+    "FCT (Abuja)": 6000,
+    Lagos: 9000,
+    Rivers: 10000,
+  };
+
+  if (deliveryRates.hasOwnProperty(state)) {
+    return deliveryRates[state];
+  } else {
+    return 4500;
+  }
+};
 
 const createOrderOnServer = async (orderData) => {
-  const response = await fetch("http://localhost:3001/api/orders", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(orderData),
-  });
+  const response = await fetch(
+    `${import.meta.env.VITE_API_BASE_URL}/api/orders`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(orderData),
+    }
+  );
 
   if (!response.ok) {
     throw new Error("Failed to create order on the server.");
@@ -44,7 +40,7 @@ const createOrderOnServer = async (orderData) => {
 
 const initializePaystackPayment = async (paymentData) => {
   const response = await fetch(
-    "http://localhost:3001/api/paystack/initialize",
+    `${import.meta.env.VITE_API_BASE_URL}/api/paystack/initialize`,
     {
       method: "POST",
       headers: {
@@ -63,20 +59,17 @@ const initializePaystackPayment = async (paymentData) => {
 };
 
 export default function Payment() {
-  const { cartItems, checkoutData, specialInstructions } = useCart();
+  const { cartItems, checkoutData, specialInstructions, deliveryCost } =
+    useCart();
   const [selectedPayment, setSelectedPayment] = useState("whatsapp");
   const [orderId, setOrderId] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
 
+  const shippingCost = getDeliveryCost(checkoutData.state);
   const subtotal = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
-
-  const selectedShippingRate = shippingRates.find(
-    (rate) => rate.id === "standard"
-  );
-  const shippingCost = selectedShippingRate ? selectedShippingRate.cost : 2500;
   const total = subtotal + shippingCost;
 
   const generateMessage = (id) => {
@@ -124,9 +117,9 @@ Payments made via the link are automatically confirmed
 
 
 OPTION 2: Transfer to this bank account 🏦
-Acc Num: 1234567890
-Bank: ABCD BANK
-Acc Name: ABCD
+Acc Num: ${import.meta.env.VITE_BANK_ACC_NUM}
+Bank: ${import.meta.env.VITE_BANK_NAME}
+Acc Name: ${import.meta.env.VITE_BANK_ACC_NAME}
 -----------------------------------
 
 Order ID: ${id}`;
@@ -165,7 +158,7 @@ Order ID: ${id}`;
       } else if (selectedPayment === "whatsapp") {
         const message = generateMessage(uniqueOrderId);
         const encodedMessage = encodeURIComponent(message);
-        const whatsappNumber = "2348051749331";
+        const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER;
         window.open(
           `https://wa.me/${whatsappNumber}?text=${encodedMessage}`,
           "_blank"
@@ -188,7 +181,9 @@ Order ID: ${id}`;
           );
           setTimeout(() => {
             window.open(
-              "https://www.instagram.com/your_instagram_username/",
+              `https://www.instagram.com/${
+                import.meta.env.VITE_INSTAGRAM_USERNAME
+              }/`,
               "_blank"
             );
           }, 1000);
@@ -394,7 +389,7 @@ Order ID: ${id}`;
             <span className="font-semibold">₦{subtotal.toLocaleString()}</span>
           </div>
           <div className="flex justify-between items-center text-black mt-2">
-            <span>Shipping</span>
+            <span>Delivery fee</span>
             <span className="font-semibold">
               ₦{shippingCost.toLocaleString()}
             </span>

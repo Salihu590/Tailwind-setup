@@ -15,8 +15,7 @@ const paystack = require("paystack")(process.env.PAYSTACK_SECRET_KEY);
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-const dbPassword = process.env.DB_PASSWORD;
-const dbURI = `mongodb+srv://Salihu:${dbPassword}@manwe.4zhbdze.mongodb.net/ecom_orders?retryWrites=true&w=majority&appName=Manwe`;
+const dbURI = process.env.DB_URI;
 
 mongoose
   .connect(dbURI)
@@ -222,6 +221,9 @@ const generateAdminNotificationContent = (order) => {
   `
     : "";
 
+  const dashboardUrl =
+    process.env.DASHBOARD_URL || `http://localhost:${PORT}/admindashboard.html`;
+
   return `
     <h1>New Order Received! 🛍️</h1>
     <p>A new order has been placed on your store. Here are the details:</p>
@@ -247,7 +249,7 @@ const generateAdminNotificationContent = (order) => {
     ${instructionsHtml}
 
     <div style="margin-top: 20px;">
-      <a href="http://localhost:3001/admindashboard.html" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+      <a href="${dashboardUrl}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
         View New Order in Dashboard
       </a>
     </div>
@@ -349,6 +351,8 @@ const sendDeliveredEmail = async (order) => {
   }
 };
 
+app.use(cors());
+
 app.use(
   express.json({
     verify: (req, res, buf) => {
@@ -358,8 +362,8 @@ app.use(
     },
   })
 );
-app.use(cors());
-app.use(express.static(path.join(__dirname, "..", "client", "public")));
+
+app.use(express.static(path.join(__dirname, "..", "client", "dist")));
 
 const auth = (req, res, next) => {
   const token = req.header("x-auth-token");
@@ -532,7 +536,7 @@ app.put("/api/admin/orders/:orderId/notes", auth, async (req, res) => {
       return res.status(400).json({ message: "Note content is required" });
     }
 
-    const order = await Order.findById(orderId);
+    const order = await Order.findOne({ orderId: orderId });
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
@@ -734,6 +738,10 @@ app.post("/api/paystack/webhook", async (req, res) => {
     }
   }
   res.sendStatus(200);
+});
+
+app.get("/{*any}", (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "client", "dist", "index.html"));
 });
 
 app.listen(PORT, () => {
