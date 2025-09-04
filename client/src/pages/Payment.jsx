@@ -59,8 +59,7 @@ const initializePaystackPayment = async (paymentData) => {
 };
 
 export default function Payment() {
-  const { cartItems, checkoutData, specialInstructions, deliveryCost } =
-    useCart();
+  const { cartItems, checkoutData, specialInstructions } = useCart();
   const [selectedPayment, setSelectedPayment] = useState("whatsapp");
   const [orderId, setOrderId] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -100,7 +99,7 @@ Name: ${checkoutData.firstName} ${checkoutData.lastName}
 Phone: ${checkoutData.phone}
 Address: ${checkoutData.address}, ${checkoutData.city}, ${
       checkoutData.state
-    }, ${checkoutData.country}
+    }, ${checkoutData.country || "Nigeria"}
 
 🚚 Delivery Cost: NGN ${shippingCost.toLocaleString()}
 💰 Total Price: NGN ${total.toLocaleString()}
@@ -134,7 +133,10 @@ Order ID: ${id}`;
     try {
       const orderDetails = {
         cartItems,
-        checkoutData,
+        checkoutData: {
+          ...checkoutData,
+          country: checkoutData.country || "Nigeria", // ✅ ensure country is never missing
+        },
         specialInstructions,
         shippingCost,
         total,
@@ -351,7 +353,8 @@ Order ID: ${id}`;
           </p>
           <p className="text-sm text-gray-600 mt-2">
             <strong>Delivery Location:</strong> {checkoutData.address},{" "}
-            {checkoutData.city}, {checkoutData.state}, {checkoutData.country}
+            {checkoutData.city}, {checkoutData.state},{" "}
+            {checkoutData.country || "Nigeria"}
           </p>
         </div>
         <div className="space-y-4">
