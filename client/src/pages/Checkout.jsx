@@ -53,6 +53,7 @@ export default function Checkout() {
     useCart();
   const navigate = useNavigate();
 
+  
   const [formData, setFormData] = useState(
     checkoutData || {
       firstName: "",
@@ -66,12 +67,14 @@ export default function Checkout() {
     }
   );
 
+  const country = formData.country || "Nigeria";
+  const states = statesByCountry[country] || [];
+  const phoneCode = countryCodes[country] || "";
+
   const subtotal = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
-  const states = statesByCountry[formData.country] || [];
-  const phoneCode = countryCodes[formData.country] || "";
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
@@ -81,7 +84,7 @@ export default function Checkout() {
       !formData.lastName ||
       !formData.address ||
       !formData.city ||
-      !formData.country ||
+      !country ||
       !formData.state ||
       !formData.phone ||
       !formData.email
@@ -168,7 +171,7 @@ export default function Checkout() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <select
               name="country"
-              value={formData.country}
+              value={country}
               onChange={handleInputChange}
               className="border p-3 rounded-lg w-full text-black"
               required
