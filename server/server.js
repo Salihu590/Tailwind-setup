@@ -222,7 +222,7 @@ const generateAdminNotificationContent = (order) => {
     : "";
 
   const dashboardUrl =
-    process.env.DASHBOARD_URL || `http://localhost:${PORT}/admindashboard.html`;
+    process.env.DASHBOARD_URL || `https://manwe.netlify.app/admindashboard.html`;
 
   return `
     <h1>New Order Received! 🛍️</h1>
