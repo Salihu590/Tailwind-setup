@@ -1,4 +1,4 @@
-const API_URL = "https://tailwind-setup.onrender.com/api/admin";
+const API_URL = "http://localhost:3001/api/admin";
 
 const app = document.getElementById("app");
 const loginFormContainer = document.getElementById("login-form-container");
@@ -42,6 +42,7 @@ const ordersViewBtn = document.getElementById("orders-view-btn");
 const customersViewBtn = document.getElementById("customers-view-btn");
 const revenueViewBtn = document.getElementById("revenue-view-btn");
 const topProductsViewBtn = document.getElementById("top-products-view-btn");
+const newsletterViewBtn = document.getElementById("newsletter-view-btn");
 
 const ordersSection = document.getElementById("orders-section");
 const customersSection = document.getElementById("customers-section");
@@ -51,15 +52,32 @@ const revenueReportContainer = document.getElementById(
 const topProductsReportContainer = document.getElementById(
   "top-products-report-container"
 );
+const newsletterSection = document.getElementById("newsletter-section");
 
 const topProductsList = document.getElementById("top-products-list");
+
+const newsletterSubjectInput = document.getElementById("newsletter-subject");
+const newsletterContentTextarea = document.getElementById("newsletter-content");
+const sendNewsletterBtn = document.getElementById("send-newsletter-btn");
+const subscribersList = document.getElementById("subscribers-list");
+const subscriberCountSpan = document.getElementById("subscriber-count");
 
 let allCustomersData = [];
 let revenueChart = null;
 let isActiveView = true;
 
+const loginButton = document.getElementById("login-button");
+const loginText = document.getElementById("login-text");
+const spinner = document.getElementById("spinner");
+
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
+
+  loginButton.disabled = true;
+  loginText.style.display = "none";
+  spinner.style.display = "inline-block";
+  errorMessage.textContent = "";
+
   const username = usernameInput.value;
   const password = passwordInput.value;
 
@@ -86,6 +104,10 @@ loginForm.addEventListener("submit", async (e) => {
     console.error("Login failed:", error);
     errorMessage.textContent =
       "An error occurred. Please check the server connection.";
+  } finally {
+    loginButton.disabled = false;
+    loginText.style.display = "inline";
+    spinner.style.display = "none";
   }
 });
 
@@ -95,12 +117,14 @@ const showSection = (sectionToShow, buttonToActivate) => {
     customersSection,
     revenueReportContainer,
     topProductsReportContainer,
+    newsletterSection,
   ];
   const allButtons = [
     ordersViewBtn,
     customersViewBtn,
     revenueViewBtn,
     topProductsViewBtn,
+    newsletterViewBtn,
   ];
   allSections.forEach((section) => section.classList.add("hidden"));
   allButtons.forEach((button) => button.classList.remove("active"));
@@ -123,6 +147,10 @@ revenueViewBtn.addEventListener("click", () => {
 topProductsViewBtn.addEventListener("click", () => {
   showSection(topProductsReportContainer, topProductsViewBtn);
   renderTopSellingProducts();
+});
+newsletterViewBtn.addEventListener("click", () => {
+  showSection(newsletterSection, newsletterViewBtn);
+  fetchSubscribers();
 });
 
 activeOrdersBtn.addEventListener("click", () => {
@@ -159,6 +187,8 @@ clearCustomerFiltersButton.addEventListener("click", () => {
   customerSearchInput.value = "";
   renderCustomers();
 });
+
+sendNewsletterBtn.addEventListener("click", sendNewsletter);
 
 async function renderDashboard() {
   const token = localStorage.getItem("adminToken");
@@ -689,7 +719,7 @@ async function updateOrderStatus(orderId, newStatus) {
     });
 
     if (response.ok) {
-      console.log(`Order ${orderId} status updated to ${newStatus}`);
+      console.log(`Order ${orderId} status updated to: ${newStatus}`);
       closeOrderDetailsModal();
       renderDashboard();
     } else {
@@ -736,6 +766,94 @@ async function updatePaymentAndOrderStatus(orderId) {
   } catch (error) {
     console.error("Error updating status:", error);
     alert("An error occurred. Please try again.");
+  }
+}
+
+async function fetchSubscribers() {
+  const token = localStorage.getItem("adminToken");
+  if (!token) {
+    alert("Please log in again.");
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/subscribers`, {
+      headers: {
+        "x-auth-token": token,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch subscribers.");
+    }
+
+    const subscribers = await response.json();
+    subscribersList.innerHTML = "";
+    subscriberCountSpan.textContent = subscribers.length;
+
+    if (subscribers.length === 0) {
+      subscribersList.innerHTML =
+        "<li class='text-gray-400'>No subscribers found.</li>";
+      return;
+    }
+
+    subscribers.forEach((subscriber) => {
+      const li = document.createElement("li");
+      li.className =
+        "text-white py-1 px-2 border-b border-gray-700 last:border-b-0";
+      li.textContent = subscriber.email;
+      subscribersList.appendChild(li);
+    });
+  } catch (error) {
+    console.error("Error fetching subscribers:", error);
+    subscribersList.innerHTML =
+      "<li class='text-red-500'>Failed to load subscribers.</li>";
+  }
+}
+
+async function sendNewsletter() {
+  const token = localStorage.getItem("adminToken");
+  if (!token) {
+    alert("Please log in again.");
+    return;
+  }
+
+  const subject = newsletterSubjectInput.value;
+  const content = newsletterContentTextarea.value;
+
+  if (!subject || !content) {
+    alert("Please enter both a subject and some content.");
+    return;
+  }
+
+  sendNewsletterBtn.disabled = true;
+  sendNewsletterBtn.textContent = "Sending...";
+
+  try {
+    const response = await fetch(`${API_URL}/newsletter/send`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-auth-token": token,
+      },
+      body: JSON.stringify({ subject, content }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      alert(data.message);
+      newsletterSubjectInput.value = "";
+      newsletterContentTextarea.value = "";
+    } else {
+      throw new Error(data.error || "Failed to send newsletter.");
+    }
+  } catch (error) {
+    console.error("Error sending newsletter:", error);
+    alert(`Error: ${error.message}`);
+  } finally {
+    sendNewsletterBtn.disabled = false;
+    sendNewsletterBtn.textContent = "Send Newsletter";
   }
 }
 

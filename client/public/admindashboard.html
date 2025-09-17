@@ -9,6 +9,10 @@
       rel="stylesheet"
     />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
     <style>
       :root {
         --bg-color: #ffffff;
@@ -90,12 +94,25 @@
         border-radius: 5px;
         cursor: pointer;
         font-weight: 600;
+        position: relative; 
+        overflow: hidden; 
+        display: flex;
+        align-items: center; 
+        justify-content: center; 
+        transition: all 0.3s ease; 
+      }
+      #login-form button.loading {
+        cursor: not-allowed;
+        background-color: #333 !important;
+      }
+      #login-form button.loading #login-text {
+        opacity: 0;
       }
       #login-form button:hover {
         background-color: #000000;
       }
       .hidden {
-        display: none;
+        display: none !important;
       }
       .order-container,
       .customer-container {
@@ -214,6 +231,9 @@
         border-radius: 5px;
         cursor: pointer;
         font-weight: 600;
+      }
+      .toolbar button:hover {
+        opacity: 0.9;
       }
       .metrics-container {
         display: grid;
@@ -356,7 +376,28 @@
         margin-right: 15px;
       }
 
-      /* Responsive fixes for small devices */
+      
+      .spinner {
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top: 4px solid #fff;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+        vertical-align: middle;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      
       @media screen and (max-width: 480px) {
         body {
           padding: 10px;
@@ -419,7 +460,10 @@
             placeholder="Password"
             required
           />
-          <button type="submit">Log in</button>
+          <button type="submit" id="login-button">
+            <span id="login-text">Log in</span>
+            <div id="spinner" class="spinner hidden"></div>
+          </button>
           <p
             id="error-message"
             style="color: var(--danger-color); text-align: center"
@@ -462,6 +506,7 @@
           <button id="customers-view-btn">Customers</button>
           <button id="revenue-view-btn">Revenue</button>
           <button id="top-products-view-btn">Top Products</button>
+          <button id="newsletter-view-btn">Newsletter</button>
         </div>
 
         <div id="main-content-area">
@@ -530,6 +575,59 @@
           >
             <h3>Top 5 Selling Products</h3>
             <div id="top-products-list"></div>
+          </div>
+
+          <div id="newsletter-section" class="report-container hidden">
+            <h3 class="text-xl font-bold mb-4">Send a Newsletter 📧</h3>
+            <p class="text-gray-400 mb-6 text-sm">
+              Create and send an email to all your subscribed customers. You can
+              use standard HTML to format your content.
+            </p>
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+              <div class="mb-4">
+                <label
+                  for="newsletter-subject"
+                  class="block text-sm text-gray-300 font-medium mb-1"
+                  >Subject:</label
+                >
+                <input
+                  type="text"
+                  id="newsletter-subject"
+                  class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-white font-mono focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                  placeholder="e.g., New Collection Alert!"
+                />
+              </div>
+              <div class="mb-4">
+                <label
+                  for="newsletter-content"
+                  class="block text-sm text-gray-300 font-medium mb-1"
+                  >HTML Content:</label
+                >
+                <textarea
+                  id="newsletter-content"
+                  rows="10"
+                  class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-white font-mono focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                  placeholder="Type or paste your HTML content here."
+                ></textarea>
+              </div>
+              <button
+                id="send-newsletter-btn"
+                class="w-full bg-yellow-500 text-black font-bold py-2 px-4 rounded-md hover:bg-yellow-600 transition-colors disabled:bg-gray-500 disabled:cursor-not-allowed"
+              >
+                Send Newsletter
+              </button>
+            </div>
+            <div class="mt-8">
+              <h4 class="text-lg font-bold">Subscribers List 📋</h4>
+              <p class="text-sm text-gray-400">
+                Total subscribers: <span id="subscriber-count">0</span>
+              </p>
+              <ul
+                id="subscribers-list"
+                class="bg-gray-800 p-4 mt-2 rounded-md max-h-64 overflow-y-auto"
+              >
+                </ul>
+            </div>
           </div>
         </div>
       </div>

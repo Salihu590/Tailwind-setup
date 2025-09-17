@@ -45,8 +45,13 @@ export default function Product() {
   });
 
   const handleAddToCart = () => {
+    if (!product.inStock) {
+      setConfirmationMessage("Sorry, this item is out of stock.");
+      return;
+    }
+
     if (!selectedSize) {
-      alert("Please select a size before adding to cart.");
+      setConfirmationMessage("Please select a size before adding to cart.");
       return;
     }
 
@@ -72,12 +77,21 @@ export default function Product() {
           <img
             src={product.images[currentImageIndex]}
             alt={`${product.name} view ${currentImageIndex + 1}`}
-            className="rounded-lg shadow-lg w-full h-auto object-contain"
+            className={`rounded-lg shadow-lg w-full h-auto object-contain ${
+              !product.inStock && "grayscale opacity-50"
+            }`}
             onError={(e) => {
               e.target.src =
                 "https://res.cloudinary.com/dsci2gspy/image/upload/v1756147657/WhatsApp_Image_2025-08-25_at_16.51.47_c686c776_aebbpo.jpg";
             }}
           />
+          {!product.inStock && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="bg-red-600 text-white font-bold text-lg px-6 py-2 rounded-full">
+                Out of Stock
+              </span>
+            </div>
+          )}
 
           {product.images.length > 1 && (
             <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex justify-center space-x-2">
@@ -141,7 +155,10 @@ export default function Product() {
           <select
             value={selectedSize}
             onChange={(e) => setSelectedSize(e.target.value)}
-            className="bg-black border border-gray-700 rounded-lg px-4 py-2 text-white"
+            className={`bg-black border rounded-lg px-4 py-2 text-white ${
+              !product.inStock ? "border-red-600 cursor-not-allowed" : "border-gray-700"
+            }`}
+            disabled={!product.inStock} 
           >
             <option value="">Choose a size</option>
             {product.sizes.map((size) => (
@@ -151,12 +168,17 @@ export default function Product() {
             ))}
           </select>
         </div>
-
+        
         <button
           onClick={handleAddToCart}
-          className="bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-3 rounded-lg w-fit"
+          className={`px-6 py-3 rounded-lg w-fit transition-all ${
+            product.inStock
+              ? "bg-yellow-500 hover:bg-yellow-600 text-black"
+              : "bg-gray-600 text-gray-400 cursor-not-allowed"
+          }`}
+          disabled={!product.inStock} 
         >
-          Add to Cart
+          {product.inStock ? "Add to Cart" : "Out of Stock"}
         </button>
       </div>
 

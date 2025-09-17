@@ -12,6 +12,7 @@ const products = Object.freeze([
       "A premium cotton tee designed for comfort and everyday streetwear styling.",
     ],
     sizes: ["S", "M", "L", "XL"],
+    inStock: true, 
   },
   {
     id: 2,
@@ -26,6 +27,7 @@ const products = Object.freeze([
       "Lightweight and breathable shorts, perfect for casual wear or sports.",
     ],
     sizes: ["S", "M", "L", "XL"],
+    inStock: true, 
   },
   {
     id: 3,
@@ -40,6 +42,7 @@ const products = Object.freeze([
       "Sleek and stylish tank top, crafted for both workouts and urban fashion.",
     ],
     sizes: ["S", "M", "L", "XL"],
+    inStock: true, 
   },
   {
     id: 4,
@@ -54,6 +57,7 @@ const products = Object.freeze([
       "Trendy fitted baby tee, designed to elevate any casual look.",
     ],
     sizes: ["XS", "S", "M", "L"],
+    inStock: true, 
   },
   {
     id: 5,
@@ -67,6 +71,7 @@ const products = Object.freeze([
       "Comfortable joggers with a relaxed fit, ideal for lounging or streetwear.",
     ],
     sizes: ["S", "M", "L", "XL"],
+    inStock: true, 
   },
   {
     id: 6,
@@ -82,6 +87,7 @@ const products = Object.freeze([
       "Note: The name and number at the back of the jersey can be customised to your preference. Please add your desired name and number in the 'Special instructions for the seller' section during checkout.",
     ],
     sizes: ["S", "M", "L", "XL"],
+    inStock: true, 
   },
 ]);
 

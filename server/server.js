@@ -22,7 +22,6 @@ mongoose
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("Could not connect to MongoDB...", err));
 
-// --- Schemas and Models ---
 const adminSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
@@ -31,6 +30,12 @@ adminSchema.methods.comparePassword = function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 const Admin = mongoose.model("Admin", adminSchema);
+
+const newsletterSchema = new mongoose.Schema({
+  email: { type: String, required: true, unique: true },
+  subscribedAt: { type: Date, default: Date.now },
+});
+const Newsletter = mongoose.model("Newsletter", newsletterSchema);
 
 const cartItemSchema = new mongoose.Schema({
   id: { type: String, required: true },
@@ -222,7 +227,8 @@ const generateAdminNotificationContent = (order) => {
     : "";
 
   const dashboardUrl =
-    process.env.DASHBOARD_URL || `https://manwe.netlify.app/admindashboard.html`;
+    process.env.DASHBOARD_URL ||
+    `https://manwe.netlify.app/admindashboard.html`;
 
   return `
     <h1>New Order Received! 🛍️</h1>
@@ -377,6 +383,75 @@ const auth = (req, res, next) => {
     res.status(401).json({ error: "Token is not valid" });
   }
 };
+
+app.post("/api/newsletter/subscribe", async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: "Email is required." });
+  }
+
+  try {
+    const existingSubscriber = await Newsletter.findOne({ email });
+    if (existingSubscriber) {
+      return res
+        .status(409)
+        .json({ message: "This email is already subscribed." });
+    }
+
+    const newSubscriber = new Newsletter({ email });
+    await newSubscriber.save();
+    res.status(201).json({ message: "Subscription successful!" });
+  } catch (error) {
+    console.error("Subscription error:", error);
+    res.status(500).json({ message: "Failed to subscribe." });
+  }
+});
+
+app.get("/api/admin/subscribers", auth, async (req, res) => {
+  try {
+    const subscribers = await Newsletter.find().sort({ subscribedAt: 1 });
+    res.status(200).json(subscribers);
+  } catch (error) {
+    console.error("Error fetching subscribers:", error);
+    res.status(500).json({ error: "Failed to fetch subscriber list." });
+  }
+});
+
+app.post("/api/admin/newsletter/send", auth, async (req, res) => {
+  const { subject, content } = req.body;
+  if (!subject || !content) {
+    return res.status(400).json({ error: "Subject and content are required." });
+  }
+
+  try {
+    const subscribers = await Newsletter.find({}, "email");
+    if (subscribers.length === 0) {
+      return res.status(404).json({ message: "No subscribers found." });
+    }
+
+    const recipientEmails = subscribers.map((sub) => sub.email);
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: recipientEmails.join(","),
+      subject: subject,
+      html: content,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`Newsletter sent to ${subscribers.length} subscribers.`);
+
+    res
+      .status(200)
+      .json({
+        message: `Newsletter sent successfully to ${subscribers.length} subscribers!`,
+      });
+  } catch (error) {
+    console.error("Error sending newsletter:", error);
+    res.status(500).json({ error: "Failed to send newsletter." });
+  }
+});
 
 app.post("/api/admin/login", async (req, res) => {
   const { username, password } = req.body;

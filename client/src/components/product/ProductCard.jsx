@@ -13,11 +13,20 @@ export default function ProductCard({ product }) {
           <img
             src={imageUrl}
             alt={product.name}
-            className="w-full h-full object-cover group-hover:opacity-80 transition-opacity duration-300"
+            className={`w-full h-full object-cover transition-opacity duration-300 ${
+              !product.inStock && "grayscale opacity-50"
+            }`}
             onError={(e) => {
               e.target.src = DEFAULT_IMAGE;
             }}
           />
+          {!product.inStock && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="bg-red-600 text-white font-bold text-sm px-4 py-1 rounded-full">
+                Out of Stock
+              </span>
+            </div>
+          )}
         </div>
         <h3 className="mt-4 text-base font-medium group-hover:text-white transition-colors duration-300">
           {product.name}
