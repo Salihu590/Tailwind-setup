@@ -1,4 +1,9 @@
-const API_URL = "https://tailwind-setup.onrender.com/api/admin";
+// dashboard.js
+
+// CORRECTED: Use the correct API URL for your server.
+// If your server is running locally, this is the correct URL.
+// If you are deploying, change this to your live server URL (e.g., https://your-app-name.onrender.com/api/admin).
+const API_URL = "http://localhost:3001/api/admin";
 
 const app = document.getElementById("app");
 const loginFormContainer = document.getElementById("login-form-container");
@@ -651,7 +656,7 @@ function populateOrderModal(order) {
         <div class="add-note-container">
             <textarea id="note-textarea" placeholder="Add a new note..." rows="3"></textarea>
             <button id="add-note-button" class="action-button" onclick="addOrderNote('${
-              order._id
+              order.orderId
             }')">Add Note</button>
         </div>
     `;
@@ -866,3 +871,4 @@ logoutButton.addEventListener("click", () => {
 window.addEventListener("resize", renderDashboard);
 
 renderDashboard();
+

@@ -76,7 +76,7 @@ const products = Object.freeze([
   {
     id: 6,
     name: "MW ALL STAR JERSEY",
-    price: 30000,
+    price: 33000,
     images: [
       "https://res.cloudinary.com/dsci2gspy/image/upload/v1756229618/WhatsApp_Image_2025-08-26_at_18.32.03_40ddc9db_jgbctx.jpg",
       "https://res.cloudinary.com/dsci2gspy/image/upload/v1756229624/WhatsApp_Image_2025-08-26_at_18.32.04_ef631449_x1xma7.jpg",

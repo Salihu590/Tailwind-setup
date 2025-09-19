@@ -11,6 +11,9 @@ export default function NewsletterForm() {
     setLoading(true);
     setMessage("");
 
+    // Normalize the email to lowercase before sending
+    const normalizedEmail = email.toLowerCase();
+
     try {
       const response = await fetch(
         `${import.meta.env.VITE_SERVER_URL}/api/newsletter/subscribe`,
@@ -19,7 +22,7 @@ export default function NewsletterForm() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ email }),
+          body: JSON.stringify({ email: normalizedEmail }),
         }
       );
 

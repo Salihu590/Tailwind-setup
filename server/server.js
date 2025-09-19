@@ -6,7 +6,12 @@ const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const path = require("path");
-const nodemailer = require("nodemailer");
+const {
+  sendConfirmationEmail,
+  sendNewOrderNotification,
+  sendShippedEmail,
+  sendDeliveredEmail,
+} = require("./emailService");
 
 dotenv.config();
 
@@ -14,6 +19,15 @@ const paystack = require("paystack")(process.env.PAYSTACK_SECRET_KEY);
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+const nodemailer = require("nodemailer");
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
 
 const dbURI = process.env.DB_URI;
 
@@ -32,7 +46,12 @@ adminSchema.methods.comparePassword = function (candidatePassword) {
 const Admin = mongoose.model("Admin", adminSchema);
 
 const newsletterSchema = new mongoose.Schema({
-  email: { type: String, required: true, unique: true },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
+  },
   subscribedAt: { type: Date, default: Date.now },
 });
 const Newsletter = mongoose.model("Newsletter", newsletterSchema);
@@ -78,302 +97,25 @@ const orderSchema = new mongoose.Schema({
   },
   specialInstructions: String,
   notes: [{ type: String }],
+  viewed: { type: Boolean, default: false },
 });
 const Order = mongoose.model("Order", orderSchema);
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+const allowedOrigins = process.env.ALLOWED_ORIGINS.split(",");
 
-const generateConfirmationEmailContent = (order) => {
-  let itemDetails = "";
-  order.cartItems.forEach((item) => {
-    itemDetails += `
-      <li style="margin-bottom: 10px;">
-        <div>
-          <strong>${item.name}</strong> (x${item.quantity})<br>
-          <small>Size: ${item.size || "N/A"}</small><br>
-          <small>Price: ₦${item.price.toFixed(2)}</small>
-        </div>
-      </li>
-    `;
-  });
-
-  return `
-    <h1>Order Confirmation</h1>
-    <p>Hi ${order.checkoutData.firstName},</p>
-    <p>Thank you for your order with Manwe! We're excited for you to receive your items. Your order has been confirmed and will be shipped soon.</p>
-    <p><strong>Order ID:</strong> ${order.orderId}</p>
-    <p><strong>Total Amount:</strong> ₦${order.total.toFixed(2)}</p>
-
-    <h2>Order Details</h2>
-    <ul style="list-style: none; padding: 0;">${itemDetails}</ul>
-
-    <h2>Shipping Information</h2>
-    <p><strong>Name:</strong> ${order.checkoutData.firstName} ${
-    order.checkoutData.lastName
-  }</p>
-    <p><strong>Address:</strong> ${order.checkoutData.address}, ${
-    order.checkoutData.city
-  }, ${order.checkoutData.state}, ${order.checkoutData.country}</p>
-    <p><strong>Phone:</strong> ${order.checkoutData.phone}</p>
-
-    <p>If you have any questions, please reply to this email.</p>
-    <p>Best regards,<br>The Manwe Team</p>
-  `;
-};
-
-const generateShippedEmailContent = (order) => {
-  let itemDetails = "";
-  order.cartItems.forEach((item) => {
-    itemDetails += `
-      <li style="margin-bottom: 10px;">
-        <div>
-          <strong>${item.name}</strong> (x${item.quantity})<br>
-          <small>Size: ${item.size || "N/A"}</small><br>
-          <small>Price: ₦${item.price.toFixed(2)}</small>
-        </div>
-      </li>
-    `;
-  });
-
-  return `
-    <h1>Your Manwe Order Has Shipped!</h1>
-    <p>Hi ${order.checkoutData.firstName},</p>
-    <p>Great news! Your order <strong>#${
-      order.orderId
-    }</strong> has been packed and is now on its way to you.</p>
-    
-    <h2>Order Details</h2>
-    <p><strong>Order ID:</strong> ${order.orderId}</p>
-    <p><strong>Total Amount:</strong> ₦${order.total.toFixed(2)}</p>
-    <ul style="list-style: none; padding: 0;">${itemDetails}</ul>
-
-    <h2>Shipping Information</h2>
-    <p><strong>Name:</strong> ${order.checkoutData.firstName} ${
-    order.checkoutData.lastName
-  }</p>
-    <p><strong>Address:</strong> ${order.checkoutData.address}, ${
-    order.checkoutData.city
-  }, ${order.checkoutData.state}, ${order.checkoutData.country}</p>
-    <p><strong>Phone:</strong> ${order.checkoutData.phone}</p>
-
-    <p>Thank you for shopping with us!</p>
-    <p>Best regards,<br>The Manwe Team</p>
-  `;
-};
-
-const generateDeliveredEmailContent = (order) => {
-  let itemDetails = "";
-  order.cartItems.forEach((item) => {
-    itemDetails += `
-      <li style="margin-bottom: 10px;">
-        <div>
-          <strong>${item.name}</strong> (x${item.quantity})<br>
-          <small>Size: ${item.size || "N/A"}</small><br>
-          <small>Price: ₦${item.price.toFixed(2)}</small>
-        </div>
-      </li>
-    `;
-  });
-
-  return `
-    <h1>Your Manwe Order Has Been Delivered!</h1>
-    <p>Hi ${order.checkoutData.firstName},</p>
-    <p>Great news! Your order <strong>#${
-      order.orderId
-    }</strong> has been successfully delivered to the address you provided. We hope you love your new items!</p>
-    
-    <h2>Order Details</h2>
-    <p><strong>Order ID:</strong> ${order.orderId}</p>
-    <p><strong>Total Amount:</strong> ₦${order.total.toFixed(2)}</p>
-    <ul style="list-style: none; padding: 0;">${itemDetails}</ul>
-
-    <h2>Shipping Information</h2>
-    <p><strong>Name:</strong> ${order.checkoutData.firstName} ${
-    order.checkoutData.lastName
-  }</p>
-    <p><strong>Address:</strong> ${order.checkoutData.address}, ${
-    order.checkoutData.city
-  }, ${order.checkoutData.state}, ${order.checkoutData.country}</p>
-    <p><strong>Phone:</strong> ${order.checkoutData.phone}</p>
-
-    <p>Thank you for shopping with us!</p>
-    <p>Best regards,<br>The Manwe Team</p>
-  `;
-};
-
-const generateAdminNotificationContent = (order) => {
-  let itemDetails = "";
-  order.cartItems.forEach((item) => {
-    itemDetails += `
-      <li>
-        <strong>${item.name}</strong> (x${item.quantity}) - ₦${(
-      item.price * item.quantity
-    ).toFixed(2)}
-      </li>
-    `;
-  });
-
-  const instructionsHtml = order.specialInstructions
-    ? `
-    <h2>Special Instructions</h2>
-    <p>${order.specialInstructions}</p>
-  `
-    : "";
-
-  const dashboardUrl =
-    process.env.DASHBOARD_URL ||
-    `https://manwe.netlify.app/admindashboard.html`;
-
-  return `
-    <h1>New Order Received! 🛍️</h1>
-    <p>A new order has been placed on your store. Here are the details:</p>
-    
-    <h2>Order Information</h2>
-    <p><strong>Order ID:</strong> ${order.orderId}</p>
-    <p><strong>Total Amount:</strong> ₦${order.total.toFixed(2)}</p>
-    <p><strong>Payment Status:</strong> ${order.paymentStatus}</p>
-    
-    <h2>Customer Details</h2>
-    <p><strong>Name:</strong> ${order.checkoutData.firstName} ${
-    order.checkoutData.lastName
-  }</p>
-    <p><strong>Email:</strong> ${order.checkoutData.email}</p>
-    <p><strong>Phone:</strong> ${order.checkoutData.phone}</p>
-    <p><strong>Address:</strong> ${order.checkoutData.address}, ${
-    order.checkoutData.city
-  }, ${order.checkoutData.state}</p>
-
-    <h2>Order Items</h2>
-    <ul style="list-style: none; padding: 0;">${itemDetails}</ul>
-
-    ${instructionsHtml}
-
-    <div style="margin-top: 20px;">
-      <a href="${dashboardUrl}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
-        View New Order in Dashboard
-      </a>
-    </div>
-
-    <p>This is an automated notification. Do not reply to this email.</p>
-  `;
-};
-
-const sendConfirmationEmail = async (order) => {
-  const customerEmail = order.checkoutData.email;
-  if (!customerEmail || !customerEmail.includes("@")) {
-    console.error(
-      "Error: Customer email is invalid or missing. Email:",
-      customerEmail
-    );
-    return;
-  }
-  const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to: customerEmail,
-    subject: `Manwe: Order Confirmed #${order.orderId}`,
-    html: generateConfirmationEmailContent(order),
-  };
-  try {
-    await transporter.sendMail(mailOptions);
-    console.log(`Confirmation email sent successfully to ${customerEmail}`);
-  } catch (error) {
-    console.error(`Error sending email to ${customerEmail}:`, error);
-  }
-};
-
-const sendNewOrderNotification = async (order) => {
-  const adminEmail = process.env.ADMIN_EMAIL;
-  const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to: adminEmail,
-    subject: `Manwe: New Order Received - #${order.orderId}`,
-    html: generateAdminNotificationContent(order),
-  };
-  try {
-    await transporter.sendMail(mailOptions);
-    console.log(
-      `New order notification email sent successfully to ${adminEmail}`
-    );
-  } catch (error) {
-    console.error(`Error sending new order notification email:`, error);
-  }
-};
-
-const sendShippedEmail = async (order) => {
-  const customerEmail = order.checkoutData.email;
-  if (!customerEmail || !customerEmail.includes("@")) {
-    console.error(
-      "Error: Customer email is invalid or missing. Email:",
-      customerEmail
-    );
-    return;
-  }
-  const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to: customerEmail,
-    subject: `Manwe: Your Order #${order.orderId} Has Shipped`,
-    html: generateShippedEmailContent(order),
-  };
-  try {
-    await transporter.sendMail(mailOptions);
-    console.log(`Shipped email sent successfully for order ${order.orderId}`);
-  } catch (error) {
-    console.error(
-      `Error sending shipped email for order ${order.orderId}:`,
-      error
-    );
-  }
-};
-
-const sendDeliveredEmail = async (order) => {
-  const customerEmail = order.checkoutData.email;
-  if (!customerEmail || !customerEmail.includes("@")) {
-    console.error(
-      "Error: Customer email is invalid or missing. Email:",
-      customerEmail
-    );
-    return;
-  }
-  const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to: customerEmail,
-    subject: `Manwe: Your Order #${order.orderId} Has Been Delivered`,
-    html: generateDeliveredEmailContent(order),
-  };
-  try {
-    await transporter.sendMail(mailOptions);
-    console.log(`Delivered email sent successfully for order ${order.orderId}`);
-  } catch (error) {
-    console.error(
-      `Error sending delivered email for order ${order.orderId}:`,
-      error
-    );
-  }
-};
-
-
-const allowedOrigins = [
-  'https://manwe.netlify.app',
-  'http://localhost:5173' 
-];
-
-app.use(cors({
-  origin: function (origin, callback) {
-   
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  }
-}));
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg =
+          "The CORS policy for this site does not allow access from the specified Origin.";
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true);
+    },
+  })
+);
 
 app.use(
   express.json({
@@ -424,6 +166,27 @@ app.post("/api/newsletter/subscribe", async (req, res) => {
   }
 });
 
+app.delete(
+  "/api/admin/newsletter/unsubscribe/:email",
+  auth,
+  async (req, res) => {
+    try {
+      const { email } = req.params;
+
+      const result = await Newsletter.findOneAndDelete({ email });
+
+      if (!result) {
+        return res.status(404).json({ message: "Subscriber not found." });
+      }
+
+      res.status(200).json({ message: "Subscriber deleted successfully." });
+    } catch (error) {
+      console.error("Error deleting subscriber:", error);
+      res.status(500).json({ error: "Failed to delete subscriber." });
+    }
+  }
+);
+
 app.get("/api/admin/subscribers", auth, async (req, res) => {
   try {
     const subscribers = await Newsletter.find().sort({ subscribedAt: 1 });
@@ -454,15 +217,11 @@ app.post("/api/admin/newsletter/send", auth, async (req, res) => {
       subject: subject,
       html: content,
     };
-
     await transporter.sendMail(mailOptions);
     console.log(`Newsletter sent to ${subscribers.length} subscribers.`);
-
-    res
-      .status(200)
-      .json({
-        message: `Newsletter sent successfully to ${subscribers.length} subscribers!`,
-      });
+    res.status(200).json({
+      message: `Newsletter sent successfully to ${subscribers.length} subscribers!`,
+    });
   } catch (error) {
     console.error("Error sending newsletter:", error);
     res.status(500).json({ error: "Failed to send newsletter." });
@@ -508,6 +267,7 @@ app.post("/api/orders", async (req, res) => {
       specialInstructions,
       orderStatus: "pending",
       paymentStatus: "pending",
+      viewed: false,
     });
     await newOrder.save();
     console.log(`New order created and saved to DB: ${newOrderId}`);
@@ -518,24 +278,70 @@ app.post("/api/orders", async (req, res) => {
   }
 });
 
+app.get("/api/admin/orders/unviewed/count", auth, async (req, res) => {
+  try {
+    const count = await Order.countDocuments({ viewed: false });
+    res.status(200).json({ count });
+  } catch (error) {
+    console.error("Error fetching unviewed order count:", error);
+    res.status(500).json({ error: "Failed to fetch count." });
+  }
+});
+
+app.put("/api/admin/orders/mark-as-viewed", auth, async (req, res) => {
+  try {
+    await Order.updateMany({ viewed: false }, { $set: { viewed: true } });
+    res.status(200).json({ message: "All new orders marked as viewed." });
+  } catch (error) {
+    console.error("Error marking orders as viewed:", error);
+    res.status(500).json({ error: "Failed to mark orders as viewed." });
+  }
+});
+
 app.get("/api/admin/orders", auth, async (req, res) => {
   try {
-    const { startDate, endDate } = req.query;
+    const {
+      searchQuery,
+      paymentStatus,
+      orderStatus,
+      startDate,
+      endDate,
+      isArchived,
+    } = req.query;
+
     let filter = {};
 
-    if (startDate && endDate) {
-      filter.createdAt = {
-        $gte: new Date(startDate),
-        $lte: new Date(endDate),
-      };
-    } else if (startDate) {
-      filter.createdAt = {
-        $gte: new Date(startDate),
-      };
-    } else if (endDate) {
-      filter.createdAt = {
-        $lte: new Date(endDate),
-      };
+    if (searchQuery) {
+      filter.$or = [
+        { orderId: { $regex: searchQuery, $options: "i" } },
+        { "checkoutData.firstName": { $regex: searchQuery, $options: "i" } },
+        { "checkoutData.lastName": { $regex: searchQuery, $options: "i" } },
+        { "checkoutData.email": { $regex: searchQuery, $options: "i" } },
+      ];
+    }
+
+    if (paymentStatus) {
+      filter.paymentStatus = paymentStatus;
+    }
+
+    if (orderStatus) {
+      filter.orderStatus = orderStatus;
+    }
+
+    if (startDate || endDate) {
+      filter.createdAt = {};
+      if (startDate) {
+        filter.createdAt.$gte = new Date(startDate);
+      }
+      if (endDate) {
+        filter.createdAt.$lte = new Date(endDate);
+      }
+    }
+
+    if (isArchived === "true") {
+      filter.orderStatus = "delivered";
+    } else if (isArchived === "false") {
+      filter.orderStatus = { $ne: "delivered" };
     }
 
     const orders = await Order.find(filter).sort({ createdAt: -1 });
@@ -715,6 +521,32 @@ app.get("/api/admin/customers/:email", auth, async (req, res) => {
   }
 });
 
+app.get("/api/admin/dashboard/stats", auth, async (req, res) => {
+  try {
+    const totalOrders = await Order.countDocuments();
+    const totalRevenue = await Order.aggregate([
+      { $match: { paymentStatus: "paid" } },
+      { $group: { _id: null, total: { $sum: "$total" } } },
+    ]);
+    const pendingPayments = await Order.countDocuments({
+      paymentStatus: "pending",
+    });
+    const ordersToShip = await Order.countDocuments({
+      orderStatus: "confirmed",
+    });
+
+    res.status(200).json({
+      totalOrders: totalOrders,
+      totalRevenue: totalRevenue.length > 0 ? totalRevenue[0].total : 0,
+      pendingPayments: pendingPayments,
+      ordersToShip: ordersToShip,
+    });
+  } catch (error) {
+    console.error("Error fetching dashboard stats:", error);
+    res.status(500).json({ error: "Failed to fetch dashboard stats." });
+  }
+});
+
 app.get("/api/admin/revenue-by-date", auth, async (req, res) => {
   try {
     const revenueData = await Order.aggregate([
@@ -789,6 +621,8 @@ app.post("/api/paystack/initialize", async (req, res) => {
       email,
       amount: amountInKobo,
       metadata: { orderId },
+
+      callback_url: `${process.env.FRONTEND_URL}/payment-success?orderId=${orderId}`,
     });
     res
       .status(200)
@@ -796,6 +630,42 @@ app.post("/api/paystack/initialize", async (req, res) => {
   } catch (error) {
     console.error("Paystack initialization error:", error);
     res.status(500).json({ error: "Failed to initialize payment." });
+  }
+});
+
+app.get("/api/paystack/verify/:reference", async (req, res) => {
+  const { reference } = req.params;
+  try {
+    const transaction = await paystack.transaction.verify(reference);
+    const { status, reference: verifiedReference, metadata } = transaction.data;
+    const orderId = metadata.orderId;
+
+    if (status === "success" && orderId) {
+      const order = await Order.findOneAndUpdate(
+        { orderId },
+        { paymentStatus: "paid", orderStatus: "confirmed", viewed: false },
+        { new: true }
+      );
+
+      if (order) {
+        await sendConfirmationEmail(order);
+        await sendNewOrderNotification(order);
+        return res
+          .status(200)
+          .json({ status: "success", message: "Payment confirmed." });
+      }
+    }
+    return res
+      .status(400)
+      .json({
+        status: "failed",
+        message: "Payment not successful or order not found.",
+      });
+  } catch (error) {
+    console.error("Paystack verification error:", error);
+    res
+      .status(500)
+      .json({ status: "error", message: "Failed to verify payment." });
   }
 });
 
@@ -810,20 +680,38 @@ app.post("/api/paystack/webhook", async (req, res) => {
       const orderId = event.data.metadata.orderId;
       if (orderId) {
         try {
-          const order = await Order.findOneAndUpdate(
-            { orderId },
-            { paymentStatus: "paid", orderStatus: "confirmed" },
-            { new: true }
+          const paystackResponse = await paystack.transaction.verify(
+            event.data.reference
           );
-          if (order) {
-            console.log(
-              `Payment for Order ID ${orderId} successful. Status updated.`
+
+          if (paystackResponse.data.status === "success") {
+            const order = await Order.findOneAndUpdate(
+              { orderId },
+              {
+                paymentStatus: "paid",
+                orderStatus: "confirmed",
+                viewed: false,
+              },
+              { new: true }
             );
-            sendConfirmationEmail(order);
-            sendNewOrderNotification(order);
+
+            if (order) {
+              console.log(
+                `Payment for Order ID ${orderId} successful via webhook. Status updated.`
+              );
+              await sendConfirmationEmail(order);
+              await sendNewOrderNotification(order);
+            }
+          } else {
+            console.warn(
+              `Webhook received for Order ID ${orderId}, but transaction status is not 'success'.`
+            );
           }
         } catch (error) {
-          console.error("Error updating order status:", error);
+          console.error(
+            "Error updating order status or sending emails:",
+            error
+          );
         }
       }
     }
