@@ -70,12 +70,12 @@ const generateConfirmationEmailContent = (order) => {
           <p><strong>Address:</strong> ${order.checkoutData?.address || ""}, ${order.checkoutData?.city || ""}, ${order.checkoutData?.state || ""}, ${order.checkoutData?.country || ""}</p>
           <p><strong>Phone:</strong> ${order.checkoutData?.phone || "N/A"}</p>
 
-          <p>Have questions or need assistance? Feel free to <a href="mailto:support@manwe.com">contact our support team</a>.</p>
+          <p>Have questions or need assistance? Feel free to <a href="mailto:official.mw.8@gmail.com">contact our support team</a>.</p>
           <p>Thank you for choosing Manwe! We can't wait for you to enjoy your purchase.</p>
         </div>
         <div class="footer">
-          <p>Manwe | 123 Fashion Street, Lagos, Nigeria</p>
-          <p><a href="https://manwe.com">Visit Our Website</a> | <a href="mailto:support@manwe.com">Contact Us</a></p>
+          <p>Manwe | Abuja, Nigeria</p>
+          <p><a href="https://manweofficial.com.ng/">Visit Our Website</a> | <a href="mailto:official.mw.8@gmail.com">Contact Us</a></p>
           <p>Follow us on <a href="https://x.com/manwe_jr?t=F7pDcNfp5cdJDEXJd7Y9Lw&s=09">X</a> | <a href="https://www.instagram.com/mw.civ?igsh=MXZlM3JhZXllZXZpcQ==">Instagram</a></p>
         </div>
       </div>
@@ -125,12 +125,12 @@ const generateShippedEmailContent = (order) => {
           <p><strong>Address:</strong> ${order.checkoutData?.address || ""}, ${order.checkoutData?.city || ""}, ${order.checkoutData?.state || ""}, ${order.checkoutData?.country || ""}</p>
           <p><strong>Phone:</strong> ${order.checkoutData?.phone || "N/A"}</p>
 
-          <p>Need help? <a href="mailto:support@manwe.com">Contact our support team</a> or reply to this email.</p>
+          <p>Need help? <a href="mailto:official.mw.8@gmail.com">Contact our support team</a> or reply to this email.</p>
           <p>Thank you for shopping with Manwe!</p>
         </div>
         <div class="footer">
-          <p>Manwe | 123 Fashion Street, Lagos, Nigeria</p>
-          <p><a href="https://manwe.com">Visit Our Website</a> | <a href="mailto:support@manwe.com">Contact Us</a></p>
+          <p>Manwe |Abuja, Nigeria</p>
+          <p><a href="https://manweofficial.com.ng">Visit Our Website</a> | <a href="mailto:official.mw.8@gmail.com">Contact Us</a></p>
           <p>Follow us on <a href="https://x.com/manwe_jr?t=F7pDcNfp5cdJDEXJd7Y9Lw&s=09">X</a> | <a href="https://www.instagram.com/mw.civ?igsh=MXZlM3JhZXllZXZpcQ==">Instagram</a></p>
         </div>
       </div>
@@ -180,12 +180,12 @@ const generateDeliveredEmailContent = (order) => {
           <p><strong>Address:</strong> ${order.checkoutData?.address || ""}, ${order.checkoutData?.city || ""}, ${order.checkoutData?.state || ""}, ${order.checkoutData?.country || ""}</p>
           <p><strong>Phone:</strong> ${order.checkoutData?.phone || "N/A"}</p>
 
-          <p>We’d love to hear your feedback! Reply to this email or <a href="mailto:support@manwe.com">contact us</a> with any questions or comments.</p>
+          <p>We’d love to hear your feedback! Reply to this email or <a href="mailto:mailto:official.mw.8@gmail.com">contact us</a> with any questions or comments.</p>
           <p>Thank you for choosing Manwe. Happy shopping!</p>
         </div>
         <div class="footer">
           <p>Manwe | 123 Fashion Street, Lagos, Nigeria</p>
-          <p><a href="https://manwe.com">Visit Our Website</a> | <a href="mailto:support@manwe.com">Contact Us</a></p>
+          <p><a href="https://manweofficial.com.ng/">Visit Our Website</a> | <a href="mailto:official.mw.8@gmail.com">Contact Us</a></p>
           <p>Follow us on <a href="https://x.com/manwe_jr?t=F7pDcNfp5cdJDEXJd7Y9Lw&s=09">X</a> | <a href="https://www.instagram.com/mw.civ?igsh=MXZlM3JhZXllZXZpcQ==">Instagram</a></p>
         </div>
       </div>
@@ -212,7 +212,7 @@ const generateAdminNotificationContent = (order) => {
     `
     : "";
 
-  const dashboardUrl = process.env.DASHBOARD_URL || "https://manwe.netlify.app/admindashboard.html";
+  const dashboardUrl = process.env.DASHBOARD_URL || "https://manweadmin.netlify.app/admin";
 
   return `
     <!DOCTYPE html>
@@ -250,8 +250,8 @@ const generateAdminNotificationContent = (order) => {
           </div>
         </div>
         <div class="footer">
-          <p>Manwe | 123 Fashion Street, Lagos, Nigeria</p>
-          <p><a href="https://manwe.com">Visit Our Website</a> | <a href="mailto:support@manwe.com">Contact Us</a></p>
+          <p>Manwe |Abuja, Nigeria</p>
+          <p><a href="https://manweofficial.com.ng/">Visit Our Website</a> | <a href="mailto:official.mw.8@gmail.com">Contact Us</a></p>
           <p>This is an automated notification. Please do not reply directly to this email.</p>
         </div>
       </div>

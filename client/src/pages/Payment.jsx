@@ -105,7 +105,7 @@ Address: ${checkoutData.address}, ${checkoutData.city}, ${
 💰 Total Price: NGN ${total.toLocaleString()}
 
 🛍️ Click here to view your order summary:
-https://your-website.com/orders/${id}/
+https://manweofficial.com.ng/checkout/payment/
 
 
 -----------------------------------
@@ -135,7 +135,7 @@ Order ID: ${id}`;
         cartItems,
         checkoutData: {
           ...checkoutData,
-          country: checkoutData.country || "Nigeria", // ✅ ensure country is never missing
+          country: checkoutData.country || "Nigeria", 
         },
         specialInstructions,
         shippingCost,
