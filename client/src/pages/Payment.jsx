@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCart } from "../context/CartContext";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
+import { FaCheckCircle } from "react-icons/fa";
+import { IoMailOutline, IoCallOutline } from "react-icons/io5";
 
 const getDeliveryCost = (state) => {
   const deliveryRates = {
@@ -38,31 +41,12 @@ const createOrderOnServer = async (orderData) => {
   return data;
 };
 
-const initializePaystackPayment = async (paymentData) => {
-  const response = await fetch(
-    `${import.meta.env.VITE_API_BASE_URL}/api/paystack/initialize`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(paymentData),
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error("Failed to initialize Paystack payment.");
-  }
-
-  const data = await response.json();
-  return data;
-};
-
 export default function Payment() {
-  const { cartItems, checkoutData, specialInstructions } = useCart();
+  const { cartItems, checkoutData, specialInstructions, clearCart } = useCart();
   const [selectedPayment, setSelectedPayment] = useState("whatsapp");
   const [orderId, setOrderId] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isPaymentSuccessful, setIsPaymentSuccessful] = useState(false);
 
   const shippingCost = getDeliveryCost(checkoutData.state);
   const subtotal = cartItems.reduce(
@@ -70,6 +54,17 @@ export default function Payment() {
     0
   );
   const total = subtotal + shippingCost;
+
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://js.paystack.co/v1/inline.js";
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
 
   const generateMessage = (id) => {
     const cartItemsText = cartItems
@@ -107,13 +102,11 @@ Address: ${checkoutData.address}, ${checkoutData.city}, ${
 🛍️ Click here to view your order summary:
 https://manweofficial.com.ng/checkout/payment/
 
-
 -----------------------------------
 FOR PAYMENTS
 
 OPTION 1: Use the link attached to this order 🔗
 Payments made via the link are automatically confirmed
-
 
 OPTION 2: Transfer to this bank account 🏦
 Acc Num: ${import.meta.env.VITE_BANK_ACC_NUM}
@@ -135,7 +128,7 @@ Order ID: ${id}`;
         cartItems,
         checkoutData: {
           ...checkoutData,
-          country: checkoutData.country || "Nigeria", 
+          country: checkoutData.country || "Nigeria",
         },
         specialInstructions,
         shippingCost,
@@ -148,15 +141,29 @@ Order ID: ${id}`;
       setOrderId(uniqueOrderId);
 
       if (selectedPayment === "paynow") {
-        const paystackData = {
+        const handler = window.PaystackPop.setup({
+          key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
           email: checkoutData.email,
-          amount: total,
-          orderId: uniqueOrderId,
-        };
-        const { authorization_url } = await initializePaystackPayment(
-          paystackData
-        );
-        window.open(authorization_url, "_blank");
+          amount: total * 100,
+          ref: uniqueOrderId,
+          callback: (response) => {
+            const reference = response.reference;
+            toast.success(
+              "Payment successful! Your order has been confirmed.",
+              {
+                position: "top-center",
+              }
+            );
+            clearCart();
+            setIsPaymentSuccessful(true);
+          },
+          onClose: () => {
+            toast.error("Payment was cancelled. Please try again.", {
+              position: "top-center",
+            });
+          },
+        });
+        handler.openIframe();
       } else if (selectedPayment === "whatsapp") {
         const message = generateMessage(uniqueOrderId);
         const encodedMessage = encodeURIComponent(message);
@@ -207,6 +214,61 @@ Order ID: ${id}`;
       setIsProcessing(false);
     }
   };
+
+  if (isPaymentSuccessful) {
+    const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER;
+    const gmailAccount = import.meta.env.VITE_GMAIL_ACCOUNT;
+
+    return (
+      <div className="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+        <div className="bg-white rounded-xl shadow-lg p-8 md:p-12 max-w-2xl w-full text-center">
+          <div className="flex justify-center mb-6">
+            <FaCheckCircle className="text-green-500 text-6xl animate-pulse" />
+          </div>
+          <h2 className="text-4xl md:text-5xl font-extrabold text-green-700 mb-4">
+            Order Confirmed!
+          </h2>
+          <p className="text-lg md:text-xl text-gray-700 mb-6 font-medium leading-relaxed">
+            Thank you for your purchase. We've sent a confirmation email to your
+            inbox with all the details.
+          </p>
+
+          <div className="border-t border-b border-gray-200 py-6 mb-6">
+            <h3 className="text-xl md:text-2xl font-semibold text-gray-800 mb-4">
+              Need a Hand?
+            </h3>
+            <p className="text-md md:text-lg text-gray-600 mb-4">
+              If you don't see the email within a few minutes, please check your
+              spam folder or reach out to our support team.
+            </p>
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+              <a
+                href={`mailto:${gmailAccount}`}
+                className="flex items-center gap-2 bg-white text-gray-800 border border-gray-300 rounded-full px-6 py-3 transition-colors duration-300 hover:bg-gray-100 hover:text-black font-semibold shadow-sm"
+              >
+                <IoMailOutline className="text-xl" />
+                Email Us
+              </a>
+              <a
+                href={`tel:${whatsappNumber}`}
+                className="flex items-center gap-2 bg-green-600 text-white rounded-full px-6 py-3 transition-colors duration-300 hover:bg-green-700 font-semibold shadow-md"
+              >
+                <IoCallOutline className="text-xl" />
+                Call Support
+              </a>
+            </div>
+          </div>
+
+          <Link
+            to="/"
+            className="inline-flex items-center justify-center px-8 py-4 bg-gray-800 text-white font-bold rounded-full text-lg transition-transform duration-300 transform hover:scale-105 hover:bg-black shadow-lg"
+          >
+            Continue Shopping
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white min-h-screen lg:flex lg:justify-center p-4 lg:p-10">

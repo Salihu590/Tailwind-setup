@@ -655,12 +655,10 @@ app.get("/api/paystack/verify/:reference", async (req, res) => {
           .json({ status: "success", message: "Payment confirmed." });
       }
     }
-    return res
-      .status(400)
-      .json({
-        status: "failed",
-        message: "Payment not successful or order not found.",
-      });
+    return res.status(400).json({
+      status: "failed",
+      message: "Payment not successful or order not found.",
+    });
   } catch (error) {
     console.error("Paystack verification error:", error);
     res
@@ -717,6 +715,21 @@ app.post("/api/paystack/webhook", async (req, res) => {
     }
   }
   res.sendStatus(200);
+});
+
+app.delete("/api/admin/orders/:orderId", auth, async (req, res) => {
+  const { orderId } = req.params;
+  try {
+    const order = await Order.findOneAndDelete({ orderId: orderId });
+    if (!order) {
+      return res.status(404).json({ message: "Order not found." });
+    }
+    console.log(`Order ID ${orderId} has been deleted.`);
+    res.status(200).json({ message: "Order deleted successfully." });
+  } catch (error) {
+    console.error(`Error deleting order ${orderId}:`, error);
+    res.status(500).json({ error: "Failed to delete order." });
+  }
 });
 
 app.get("/{*any}", (req, res) => {
