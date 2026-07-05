@@ -24,12 +24,12 @@ export default function Header({
   );
 
   return (
-    <header className="fixed top-0 left-0 w-full bg-black text-white z-40">
+    <header className="fixed top-0 left-0 w-full bg-black/30 backdrop-blur-md text-white z-40 border-b border-white/10 shadow-lg">
       <div className="flex items-center lg:hidden gap-4 p-4 w-full justify-between">
         {!isProductPage && (
           <button
             onClick={toggleSearch}
-            className="text-white hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]"
+            className="text-white hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)] transition"
             aria-label={searchOpen ? "Close search" : "Open search"}
           >
             <FaSearch size={20} />
@@ -37,13 +37,20 @@ export default function Header({
         )}
 
         <Link to="/" aria-label="Home">
-          <img src={logoUrl} alt="MANWE Logo" className="h-12" />
+          <img
+            src={logoUrl}
+            alt="MANWE Logo"
+            className="h-12 rounded-xl shadow-md"
+          />
         </Link>
 
         <div className="flex items-center gap-4">
           <Link to="/cart" aria-label={`Cart with ${cartCount} items`}>
             <div className="relative">
-              <FiShoppingCart size={20} />
+              <FiShoppingCart
+                size={20}
+                className="hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)] transition"
+              />
               {cartCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-red-600 text-xs rounded-full w-5 h-5 flex items-center justify-center">
                   {cartCount}
@@ -51,10 +58,9 @@ export default function Header({
               )}
             </div>
           </Link>
-          {/* The menu button is always visible now */}
           <button
             onClick={toggleMenu}
-            className="text-white hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]"
+            className="text-white hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)] transition"
             aria-label="Toggle menu"
           >
             <Menu size={24} />
@@ -63,13 +69,13 @@ export default function Header({
       </div>
 
       {searchOpen && !isProductPage && (
-        <div className="lg:hidden p-4 bg-black border-b border-gray-800">
+        <div className="lg:hidden p-4 bg-black/40 backdrop-blur-md border-b border-white/10">
           <input
             type="text"
             placeholder="Search..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-transparent border-b border-white text-white p-2 focus:outline-none"
+            className="w-full bg-transparent border-b border-white text-white p-2 focus:outline-none placeholder-gray-300"
             aria-label="Search products"
           />
         </div>
@@ -77,7 +83,11 @@ export default function Header({
 
       <div className="hidden lg:flex justify-between items-center px-8 py-4 w-full">
         <Link to="/" aria-label="Home">
-          <img src={logoUrl} alt="MANWE Logo" className="h-12" />
+          <img
+            src={logoUrl}
+            alt="MANWE Logo"
+            className="h-12 rounded-xl shadow-md"
+          />
         </Link>
 
         <div className="flex items-center gap-6">
@@ -87,14 +97,14 @@ export default function Header({
               placeholder="Search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-transparent border-b border-white text-sm px-2 py-1 focus:outline-none"
+              className="bg-transparent border-b border-white text-sm px-2 py-1 focus:outline-none placeholder-gray-300"
               aria-label="Search products"
             />
           )}
 
           <Link
             to="/cart"
-            className="flex items-center gap-1"
+            className="flex items-center gap-1 hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)] transition"
             aria-label={`Cart with ${cartCount} items`}
           >
             <div className="relative">
@@ -109,7 +119,7 @@ export default function Header({
           </Link>
           <Link
             to="/checkout"
-            className="hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]"
+            className="hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)] transition"
             aria-label="Proceed to checkout"
           >
             Check Out

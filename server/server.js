@@ -101,19 +101,28 @@ const orderSchema = new mongoose.Schema({
 });
 const Order = mongoose.model("Order", orderSchema);
 
-const allowedOrigins = process.env.ALLOWED_ORIGINS.split(",");
+const allowedOrigins = process.env.ALLOWED_ORIGINS.split(",").map((o) =>
+  o.trim()
+);
+
+console.log("ALLOWED ORIGINS LOADED:", allowedOrigins);
 
 app.use(
   cors({
     origin: function (origin, callback) {
       if (!origin) return callback(null, true);
       if (allowedOrigins.indexOf(origin) === -1) {
+        console.log("BLOCKED ORIGIN:", origin);
+        console.log("ALLOWED ORIGINS:", allowedOrigins);
         const msg =
           "The CORS policy for this site does not allow access from the specified Origin.";
         return callback(new Error(msg), false);
       }
       return callback(null, true);
     },
+    credentials: true,
+    allowedHeaders: ["Content-Type", "x-auth-token", "Authorization"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   })
 );
 

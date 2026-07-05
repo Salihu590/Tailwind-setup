@@ -123,13 +123,13 @@ export default function Shop() {
       </div>
 
       <div className="flex flex-1">
-        <aside className="hidden lg:flex flex-col justify-between w-64 p-6 font-mono uppercase text-sm border-r border-gray-800 h-screen sticky top-0">
-          <div className="space-y-4">
+        <aside className="hidden lg:flex flex-col justify-between w-64 p-6 h-screen sticky top-0 border-r border-gray-800 backdrop-blur-xl bg-white/5">
+          <div className="space-y-6">
             <div className="flex justify-center">
               <img
                 src={logoUrl}
                 alt="MANWE Logo"
-                className="w-16 h-16 object-contain mb-6"
+                className="w-16 h-16 object-contain mb-6 drop-shadow-lg"
               />
             </div>
             {categories.map((cat) => (
@@ -140,60 +140,63 @@ export default function Shop() {
                   setSelectedCategory(cat);
                   setIsLoading(true);
                 }}
-                className={`block w-full text-left cursor-pointer transition hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.3)] ${
-                  selectedCategory === cat ? "text-gray-200" : "text-gray-400"
+                className={`block w-full text-left uppercase tracking-wider font-mono transition-all duration-300 ${
+                  selectedCategory === cat
+                    ? "text-white font-bold drop-shadow-[0_0_10px_rgba(255,255,255,0.7)]"
+                    : "text-gray-400 hover:text-gray-200"
                 }`}
               >
                 {cat}
               </button>
             ))}
           </div>
+
           <div className="flex flex-col items-center mt-12 mb-4">
-            <div className="flex gap-4 mb-6">
+            <div className="flex gap-5 mb-6">
               <a
                 href="https://www.tiktok.com/@mw.civ"
                 target="_blank"
                 rel="noreferrer"
               >
-                <FaTiktok className="text-xl hover:text-gray-400 transition" />
+                <FaTiktok className="text-xl hover:scale-125 transition-transform" />
               </a>
               <a
                 href="https://wa.me/2349162407757"
                 target="_blank"
                 rel="noreferrer"
               >
-                <FaWhatsapp className="text-xl hover:text-gray-400 transition" />
+                <FaWhatsapp className="text-xl hover:scale-125 transition-transform" />
               </a>
               <a
                 href="https://www.instagram.com/mw.civ?igsh=MXZlM3JhZXllZXZpcQ=="
                 target="_blank"
                 rel="noreferrer"
               >
-                <FaInstagram className="text-xl hover:text-gray-400 transition" />
+                <FaInstagram className="text-xl hover:scale-125 transition-transform" />
               </a>
               <a
                 href="https://x.com/manwe_jr?t=F7pDcNfp5cdJDEXJd7Y9Lw&s=09"
                 target="_blank"
                 rel="noreferrer"
               >
-                <FaXTwitter className="text-xl hover:text-gray-400 transition" />
+                <FaXTwitter className="text-xl hover:scale-125 transition-transform" />
               </a>
             </div>
             <img
               src={logoUrl}
-              alt="MANWE Logo"
-              className="w-14 h-14 object-contain"
+              alt="MANWE Logo Small"
+              className="w-12 h-12 object-contain opacity-80"
             />
           </div>
         </aside>
 
         {menuOpen && (
-          <div className="lg:hidden fixed inset-0 w-full h-full bg-black bg-opacity-95 p-6 z-50 flex flex-col justify-between animate-slide-in-left">
+          <div className="lg:hidden fixed inset-0 w-full h-full backdrop-blur-2xl bg-black/90 p-6 z-50 flex flex-col justify-between animate-slide-in-left">
             <button
               onClick={() => setMenuOpen(false)}
               className="absolute top-4 right-4 text-white"
             >
-              <X size={24} />
+              <X size={28} />
             </button>
             <div className="flex flex-col items-center pt-12">
               <img
@@ -211,10 +214,10 @@ export default function Shop() {
                       setMenuOpen(false);
                       setIsLoading(true);
                     }}
-                    className={`block w-full cursor-pointer transition ${
+                    className={`block w-full cursor-pointer transition-all ${
                       selectedCategory === cat
-                        ? "text-gray-200"
-                        : "text-gray-400"
+                        ? "text-white font-bold drop-shadow-[0_0_10px_rgba(255,255,255,0.7)]"
+                        : "text-gray-400 hover:text-gray-200"
                     }`}
                   >
                     {cat}
@@ -229,34 +232,34 @@ export default function Shop() {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  <FaTiktok className="text-2xl hover:text-gray-400 transition" />
+                  <FaTiktok className="text-2xl hover:scale-125 transition-transform" />
                 </a>
                 <a
                   href="https://wa.me/2349162407757"
                   target="_blank"
                   rel="noreferrer"
                 >
-                  <FaWhatsapp className="text-2xl hover:text-gray-400 transition" />
+                  <FaWhatsapp className="text-2xl hover:scale-125 transition-transform" />
                 </a>
                 <a
                   href="https://www.instagram.com/mw.civ?igsh=MXZlM3JhZXllZXZpcQ=="
                   target="_blank"
                   rel="noreferrer"
                 >
-                  <FaInstagram className="text-2xl hover:text-gray-400 transition" />
+                  <FaInstagram className="text-2xl hover:scale-125 transition-transform" />
                 </a>
                 <a
                   href="https://x.com/manwe_jr?t=F7pDcNfp5cdJDEXJd7Y9Lw&s=09"
                   target="_blank"
                   rel="noreferrer"
                 >
-                  <FaXTwitter className="text-2xl hover:text-gray-400 transition" />
+                  <FaXTwitter className="text-2xl hover:scale-125 transition-transform" />
                 </a>
               </div>
               <img
                 src={logoUrl}
-                alt="MANWE Logo"
-                className="w-14 h-14 object-contain"
+                alt="MANWE Logo Small"
+                className="w-12 h-12 object-contain opacity-80"
               />
             </div>
           </div>
