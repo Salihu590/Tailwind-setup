@@ -1,9 +1,20 @@
-import { Outlet, useNavigate } from 'react-router-dom'
+// AdminLayout.jsx — MANWE Admin shell
+import { useEffect, useRef } from 'react'
+import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import Topbar from '../components/navigation/Topbar'
 
 export default function AdminLayout() {
   const navigate = useNavigate()
+  const { pathname } = useLocation()
+  const mainRef = useRef(null)
+
+  // Reset scroll on inner main container when admin route changes
+  useEffect(() => {
+    if (mainRef.current) {
+      mainRef.current.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+    }
+  }, [pathname])
 
   const handleLogout = async () => {
     try {
@@ -11,9 +22,13 @@ export default function AdminLayout() {
     } catch (err) {
       console.error('Logout error:', err)
     } finally {
-      localStorage.removeItem('adminToken')
-      localStorage.removeItem('adminUsername')
-      navigate('/admin/login')
+      try {
+        localStorage.removeItem('adminToken')
+        localStorage.removeItem('adminUsername')
+      } catch {
+        /* ignore */
+      }
+      navigate('/admin/login', { replace: true })
     }
   }
 
@@ -23,7 +38,7 @@ export default function AdminLayout() {
       style={{ backgroundColor: '#F4EFE6' }}
     >
       <Topbar onLogout={handleLogout} />
-      <main className="flex-1 mt-20 overflow-y-auto">
+      <main ref={mainRef} className="flex-1 mt-20 overflow-y-auto">
         <Outlet />
       </main>
     </div>

@@ -1,19 +1,24 @@
 {
-  "name": "MANWE",
-  "short_name": "MW",
+  "name": "MANWE — West African Futurism",
+  "short_name": "MANWE",
+  "description": "Streetwear Brand crafted between Abuja and Abidjan.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#080808",
+  "theme_color": "#080808",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "https://res.cloudinary.com/dsci2gspy/image/upload/v1756137912/android-chrome-192x192_dyojom.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "https://res.cloudinary.com/dsci2gspy/image/upload/v1756137874/android-chrome-512x512_ipoecr.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
-  ],
-  "theme_color": "#ffffff",
-  "background_color": "#ffffff",
-  "display": "standalone"
+  ]
 }

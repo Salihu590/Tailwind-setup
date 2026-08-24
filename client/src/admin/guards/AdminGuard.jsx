@@ -1,5 +1,5 @@
 // AdminGuard.jsx — MANWE Admin Route Protection
-// Verifies active Supabase session + admin role
+// Verifies active Supabase session + admin role (app_metadata OR user_metadata)
 
 import { Navigate, useLocation } from 'react-router-dom'
 import { useEffect, useState } from 'react'
@@ -10,18 +10,61 @@ import { supabase } from '../../lib/supabase'
 function ManweSerpentM({ size = 60, opacity = 1 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 100 100" fill="none" style={{ opacity }}>
-      <path d="M25 20 Q20 15 25 12 Q32 10 35 18 L35 40 L30 45 L20 50 L28 60 L25 75 Q22 85 30 88" stroke="#2D5A2E" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <path
+        d="M25 20 Q20 15 25 12 Q32 10 35 18 L35 40 L30 45 L20 50 L28 60 L25 75 Q22 85 30 88"
+        stroke="#2D5A2E"
+        strokeWidth="6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+      />
       <path d="M25 12 Q28 10 30 12 Q28 16 25 15" fill="#2D5A2E" />
-      <path d="M75 20 Q80 15 75 12 Q68 10 65 18 L65 40 L70 45 L80 50 L72 60 L75 75 Q78 85 70 88" stroke="#D4651F" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <path
+        d="M75 20 Q80 15 75 12 Q68 10 65 18 L65 40 L70 45 L80 50 L72 60 L75 75 Q78 85 70 88"
+        stroke="#D4651F"
+        strokeWidth="6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+      />
       <path d="M75 12 Q72 10 70 12 Q72 16 75 15" fill="#D4651F" />
-      <path d="M28 45 L28 75 L35 75 L35 55" stroke="#1A1A18" strokeWidth="5" strokeLinecap="square" strokeLinejoin="miter" fill="none" />
-      <path d="M72 45 L72 75 L65 75 L65 55" stroke="#1A1A18" strokeWidth="5" strokeLinecap="square" strokeLinejoin="miter" fill="none" />
-      <path d="M35 55 L50 70 L65 55" stroke="#1A1A18" strokeWidth="5" strokeLinecap="square" strokeLinejoin="miter" fill="none" />
+      <path
+        d="M28 45 L28 75 L35 75 L35 55"
+        stroke="#1A1A18"
+        strokeWidth="5"
+        strokeLinecap="square"
+        strokeLinejoin="miter"
+        fill="none"
+      />
+      <path
+        d="M72 45 L72 75 L65 75 L65 55"
+        stroke="#1A1A18"
+        strokeWidth="5"
+        strokeLinecap="square"
+        strokeLinejoin="miter"
+        fill="none"
+      />
+      <path
+        d="M35 55 L50 70 L65 55"
+        stroke="#1A1A18"
+        strokeWidth="5"
+        strokeLinecap="square"
+        strokeLinejoin="miter"
+        fill="none"
+      />
       <circle cx="50" cy="55" r="2" fill="#1A1A18" opacity="0.9" />
       <circle cx="35" cy="45" r="1.5" fill="#2D5A2E" />
       <circle cx="65" cy="45" r="1.5" fill="#D4651F" />
     </svg>
-  );
+  )
+}
+
+/** Same rule as Login.jsx — accept either metadata location */
+function isAdminUser(user) {
+  if (!user) return false
+  const appRole = user.app_metadata?.role
+  const userRole = user.user_metadata?.role
+  return appRole === 'admin' || userRole === 'admin'
 }
 
 export default function AdminGuard({ children }) {
@@ -32,39 +75,50 @@ export default function AdminGuard({ children }) {
     let mounted = true
 
     const checkAuth = async () => {
-      // Get current session
-      const { data: { session }, error } = await supabase.auth.getSession()
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession()
 
       if (!mounted) return
 
-      if (error || !session) {
+      if (error || !session?.user) {
         setStatus('denied')
         return
       }
 
-      // Check if user has admin role
-      const role = session.user?.user_metadata?.role
-
-      if (role === 'admin') {
+      if (isAdminUser(session.user)) {
         setStatus('authorized')
       } else {
-        // User is logged in but not an admin — sign them out and deny
+        // Logged in but not admin — sign out and deny
         await supabase.auth.signOut()
-        setStatus('denied')
+        if (mounted) setStatus('denied')
       }
     }
 
     checkAuth()
 
-    // Listen for auth state changes (sign in / sign out from other tabs)
-    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+    // Listen for auth changes (other tabs, token refresh, logout)
+    const { data: listener } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return
 
-      if (event === 'SIGNED_OUT' || !session) {
+      if (event === 'SIGNED_OUT' || !session?.user) {
         setStatus('denied')
-      } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        const role = session.user?.user_metadata?.role
-        setStatus(role === 'admin' ? 'authorized' : 'denied')
+        return
+      }
+
+      if (
+        event === 'SIGNED_IN' ||
+        event === 'TOKEN_REFRESHED' ||
+        event === 'USER_UPDATED' ||
+        event === 'INITIAL_SESSION'
+      ) {
+        if (isAdminUser(session.user)) {
+          setStatus('authorized')
+        } else {
+          await supabase.auth.signOut()
+          if (mounted) setStatus('denied')
+        }
       }
     })
 
@@ -108,7 +162,7 @@ export default function AdminGuard({ children }) {
   }
 
   if (status === 'denied') {
-    return <Navigate to='/admin/login' replace state={{ from: location }} />
+    return <Navigate to="/admin/login" replace state={{ from: location }} />
   }
 
   return children

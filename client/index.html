@@ -1,32 +1,31 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta name="description" content="Official website of MANWE clothing brand — West African Futurism" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#080808" />
+    <meta name="description" content="Official digital flagship of MANWE clothing brand — West African Futurism. High fashion and streetwear conceptualized between Nigeria and Côte d'Ivoire." />
+    <meta name="robots" content="index, follow" />
 
-    <!-- Existing fonts -->
+    <!-- Open Graph / Meta Properties -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://manweofficial.com.ng/" />
+    <meta property="og:title" content="MANWE — West African Futurism" />
+    <meta property="og:description" content="Official website of MANWE clothing brand — Streetwear crafted between Lagos, Abuja, and Abidjan." />
+    <meta property="og:image" content="https://res.cloudinary.com/dsci2gspy/image/upload/v1786899609/1786899526745-01a00b81-d161-7ca1-a8a9-d3fc6b100f58_zzmvxk.png" />
+
+    <!-- Performance Prefetching & Preconnecting -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="" />
 
+    <!-- Core Font Packages -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Rubik+Burned&family=Bebas+Neue&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap"
       rel="stylesheet"
     />
 
-    <link
-      href="https://fonts.googleapis.com/css2?family=Rubik+Burned&display=swap"
-      rel="stylesheet"
-    />
-
-    <!-- NEW — MANWE display + mono fonts -->
-    <link
-      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap"
-      rel="stylesheet"
-    />
-
-    <!-- Favicons -->
+    <!-- Device Custom Favicons -->
     <link
       rel="apple-touch-icon"
       sizes="180x180"
@@ -45,16 +44,17 @@
       href="https://res.cloudinary.com/dsci2gspy/image/upload/v1756137979/favicon-16x16_o7o2d0.png"
     />
     <link
-      rel="icon"
+      rel="shortcut icon"
       type="image/x-icon"
       href="https://res.cloudinary.com/dsci2gspy/image/upload/v1756137951/favicon_lt36zk.ico"
     />
 
+    <!-- Web Manifest Connection -->
     <link rel="manifest" href="/site.webmanifest" />
 
-    <title>MANWE</title>
+    <title>MANWE — West African Futurism</title>
 
-    <!-- Google Analytics -->
+    <!-- Google Analytics (gtag.js) -->
     <script
       async
       src="https://www.googletagmanager.com/gtag/js?id=G-49ESK2P48V"
@@ -65,12 +65,19 @@
         dataLayer.push(arguments);
       }
       gtag("js", new Date());
-      gtag("config", "G-49ESK2P48V");
+      gtag("config", "G-49ESK2P48V", {
+        anonymize_ip: true,
+        cookie_flags: "SameSite=None;Secure"
+      });
     </script>
   </head>
 
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
+  <body class="bg-[#080808] text-[#E8E3D8] antialiased selection:bg-[#C4541A] selection:text-white overflow-x-hidden">
+    <noscript>
+      <div style="background-color: #C4541A; color: white; text-align: center; padding: 15px; font-family: sans-serif; font-weight: bold; position: fixed; top: 0; left: 0; width: 100%; z-index: 9999;">
+        You need to enable JavaScript to experience the MANWE Digital Flagship.
+      </div>
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

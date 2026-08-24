@@ -1,121 +1,108 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import {
-  Mail,
-  Phone,
-  Instagram,
-  MessageCircle,
-  ArrowRight,
-} from 'lucide-react'
+// src/client/components/ContactHover.jsx
+import { useState, useRef, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { Mail, Phone, Instagram, MessageCircle, ArrowRight } from "lucide-react";
 
 export default function ContactHover() {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  // Close when clicking outside (mobile friendly)
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <div
-      className='relative'
+      className="relative z-50"
+      ref={menuRef}
       onMouseEnter={() => setIsOpen(true)}
       onMouseLeave={() => setIsOpen(false)}
     >
-      {/* Trigger */}
-      <Link
-        to='/contact'
-        className='text-white hover:text-gray-300 transition-colors font-medium tracking-wide text-sm uppercase'
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="text-[#E8E3D8]/60 hover:text-[#E8E3D8] transition-colors focus-visible:outline-none focus-visible:text-[#E8E3D8]"
+        style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "18px", letterSpacing: "0.18em" }}
+        aria-expanded={isOpen}
       >
-        Contact
-      </Link>
+        CONTACT
+      </button>
 
-      {/* Popover */}
       <div
-        className={`absolute top-full left-1/2 -translate-x-1/2 mt-3 w-72 transition-all duration-300 ${
-          isOpen
-            ? 'opacity-100 translate-y-0 pointer-events-auto'
-            : 'opacity-0 -translate-y-2 pointer-events-none'
+        className={`absolute top-full left-1/2 -translate-x-1/2 mt-4 w-64 transition-all duration-300 origin-top ${
+          isOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"
         }`}
       >
-        {/* Arrow */}
-        <div className='absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-gray-900 border-l border-t border-gray-800 rotate-45' />
+        {/* Arrow pointer */}
+        <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-[#0c0c0c] border-l border-t border-white/10 rotate-45" />
 
-        {/* Card */}
-        <div className='relative bg-gray-900 border border-gray-800 rounded-xl p-4 shadow-2xl'>
-          <p className='text-xs text-gray-400 mb-3 px-2'>QUICK CONTACT</p>
+        {/* Dropdown Card */}
+        <div className="relative bg-[#0c0c0c] border border-white/10 p-4 shadow-2xl overflow-hidden">
+          {/* Subtle noise/pattern overlay could go here */}
+          
+          <p className="text-[#D4651F] font-mono text-[9px] tracking-[0.4em] mb-3 px-2 border-b border-white/5 pb-2">
+            DIRECT INQUIRY
+          </p>
 
-          <div className='space-y-1'>
+          <div className="space-y-1">
             <a
-              href={`mailto:${import.meta.env.VITE_GMAIL_ACCOUNT}`}
-              className='flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors group'
+              href={`mailto:${import.meta.env.VITE_GMAIL_ACCOUNT || "info@manwe.com"}`}
+              className="flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 transition-colors group"
             >
-              <Mail
-                size={16}
-                className='text-gray-400 group-hover:text-white'
-              />
-              <span className='text-sm text-white'>Email us</span>
-              <ArrowRight
-                size={14}
-                className='ml-auto text-gray-500 group-hover:text-white group-hover:translate-x-1 transition-all'
-              />
+              <Mail size={15} className="text-gray-500 group-hover:text-[#E8E3D8]" />
+              <span className="text-xs tracking-wider text-gray-400 group-hover:text-[#E8E3D8] uppercase">Email</span>
+              <ArrowRight size={14} className="ml-auto text-gray-600 group-hover:text-[#D4651F] group-hover:translate-x-1 transition-all" />
             </a>
 
             <a
-              href={`https://wa.me/${import.meta.env.VITE_WHATSAPP_NUMBER}`}
-              target='_blank'
-              rel='noopener noreferrer'
-              className='flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors group'
+              href={`https://wa.me/${import.meta.env.VITE_WHATSAPP_NUMBER || "2349162407757"}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 transition-colors group"
             >
-              <MessageCircle
-                size={16}
-                className='text-gray-400 group-hover:text-white'
-              />
-              <span className='text-sm text-white'>WhatsApp</span>
-              <ArrowRight
-                size={14}
-                className='ml-auto text-gray-500 group-hover:text-white group-hover:translate-x-1 transition-all'
-              />
+              <MessageCircle size={15} className="text-gray-500 group-hover:text-[#E8E3D8]" />
+              <span className="text-xs tracking-wider text-gray-400 group-hover:text-[#E8E3D8] uppercase">WhatsApp</span>
+              <ArrowRight size={14} className="ml-auto text-gray-600 group-hover:text-[#D4651F] group-hover:translate-x-1 transition-all" />
             </a>
 
             <a
-              href={`tel:+${import.meta.env.VITE_WHATSAPP_NUMBER}`}
-              className='flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors group'
+              href={`tel:+${import.meta.env.VITE_WHATSAPP_NUMBER || "2349162407757"}`}
+              className="flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 transition-colors group"
             >
-              <Phone
-                size={16}
-                className='text-gray-400 group-hover:text-white'
-              />
-              <span className='text-sm text-white'>Call us</span>
-              <ArrowRight
-                size={14}
-                className='ml-auto text-gray-500 group-hover:text-white group-hover:translate-x-1 transition-all'
-              />
+              <Phone size={15} className="text-gray-500 group-hover:text-[#E8E3D8]" />
+              <span className="text-xs tracking-wider text-gray-400 group-hover:text-[#E8E3D8] uppercase">Call</span>
+              <ArrowRight size={14} className="ml-auto text-gray-600 group-hover:text-[#1A5C2A] group-hover:translate-x-1 transition-all" />
             </a>
 
             <a
-              href={`https://instagram.com/${import.meta.env.VITE_INSTAGRAM_USERNAME}`}
-              target='_blank'
-              rel='noopener noreferrer'
-              className='flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors group'
+              href={`https://instagram.com/${import.meta.env.VITE_INSTAGRAM_USERNAME || "mw.civ"}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 transition-colors group"
             >
-              <Instagram
-                size={16}
-                className='text-gray-400 group-hover:text-white'
-              />
-              <span className='text-sm text-white'>Instagram</span>
-              <ArrowRight
-                size={14}
-                className='ml-auto text-gray-500 group-hover:text-white group-hover:translate-x-1 transition-all'
-              />
+              <Instagram size={15} className="text-gray-500 group-hover:text-[#E8E3D8]" />
+              <span className="text-xs tracking-wider text-gray-400 group-hover:text-[#E8E3D8] uppercase">Instagram</span>
+              <ArrowRight size={14} className="ml-auto text-gray-600 group-hover:text-[#D4651F] group-hover:translate-x-1 transition-all" />
             </a>
           </div>
 
-          <div className='mt-3 pt-3 border-t border-gray-800'>
+          <div className="mt-3 pt-3 border-t border-white/5">
             <Link
-              to='/contact'
-              className='block text-center text-xs text-gray-400 hover:text-white transition-colors py-1'
+              to="/contact"
+              onClick={() => setIsOpen(false)}
+              className="block text-center font-mono text-[9px] tracking-[0.3em] text-[#1A5C2A] hover:text-[#E8E3D8] transition-colors py-1"
             >
-              View full contact page →
+              VIEW FULL CONTACT →
             </Link>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }

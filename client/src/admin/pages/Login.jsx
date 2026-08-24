@@ -1,14 +1,14 @@
 // Login.jsx — MANWE Admin Login
-// Supabase Auth with email + password
-
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-import { Loader2, Mail, Lock, Eye, EyeOff } from 'lucide-react'
+import { Mail, Lock, Eye, EyeOff, Send, LogIn } from 'lucide-react'
 
-// ─── MANWE Serpent M ──────────────────────────────────────────────────────────
+import Button from '../components/ui/Button'
+
+// ─── Design Primitives ───────────────────────────────────────────────────────
 
 function ManweSerpentM({ size = 60, opacity = 1 }) {
   return (
@@ -24,7 +24,7 @@ function ManweSerpentM({ size = 60, opacity = 1 }) {
       <circle cx="35" cy="45" r="1.5" fill="#2D5A2E" />
       <circle cx="65" cy="45" r="1.5" fill="#D4651F" />
     </svg>
-  );
+  )
 }
 
 function AdinkraDiamond({ size = 8, fill = '#D4651F', opacity = 0.8 }) {
@@ -32,48 +32,49 @@ function AdinkraDiamond({ size = 8, fill = '#D4651F', opacity = 0.8 }) {
     <svg width={size} height={size} viewBox="0 0 10 10" fill="none" style={{ opacity }}>
       <path d="M5 1 L9 5 L5 9 L1 5 Z" fill={fill} />
     </svg>
-  );
+  )
 }
 
 function FlagStrip({ className = 'w-full h-0.5' }) {
   return (
     <div className={`${className} flex`}>
-      <div className="flex flex-1">
-        <div className="flex-1 bg-[#2D5A2E]" />
-        <div className="flex-1 bg-[#F4EFE6]" />
-        <div className="flex-1 bg-[#2D5A2E]" />
-      </div>
+      <div className="flex flex-1"><div className="flex-1 bg-[#2D5A2E]" /><div className="flex-1 bg-[#F4EFE6]" /><div className="flex-1 bg-[#2D5A2E]" /></div>
       <div className="w-px bg-transparent" />
-      <div className="flex flex-1">
-        <div className="flex-1 bg-[#D4651F]" />
-        <div className="flex-1 bg-[#F4EFE6]" />
-        <div className="flex-1 bg-[#2D5A2E]" />
-      </div>
+      <div className="flex flex-1"><div className="flex-1 bg-[#D4651F]" /><div className="flex-1 bg-[#F4EFE6]" /><div className="flex-1 bg-[#2D5A2E]" /></div>
     </div>
-  );
+  )
 }
 
 function ManweGradientText({ children, fontSize = '32px', letterSpacing = '0.05em' }) {
   return (
     <span
       style={{
-        fontFamily: "'Bebas Neue', sans-serif",
-        fontSize,
-        letterSpacing,
-        lineHeight: 1,
-        background:
-          'linear-gradient(135deg, #2D5A2E 0%, #4A8C4D 25%, #1A1A18 50%, #D4651F 75%, #C4541A 100%)',
-        WebkitBackgroundClip: 'text',
-        WebkitTextFillColor: 'transparent',
-        backgroundClip: 'text',
+        fontFamily: "'Bebas Neue', sans-serif", fontSize, letterSpacing, lineHeight: 1,
+        background: 'linear-gradient(135deg, #2D5A2E 0%, #4A8C4D 25%, #1A1A18 50%, #D4651F 75%, #C4541A 100%)',
+        WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
       }}
     >
       {children}
     </span>
-  );
+  )
 }
 
-// ─── Login Page ───────────────────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+const ADMIN_HOME = '/admin'
+const MAX_EMAIL_LEN = 254
+const MIN_PASSWORD_LEN = 8
+
+function isAdmin(user) {
+  return user?.app_metadata?.role === 'admin' || user?.user_metadata?.role === 'admin'
+}
+
+function safeAdminPath(path) {
+  if (typeof path === 'string' && path.startsWith('/admin')) return path
+  return ADMIN_HOME
+}
+
+// ─── Component ───────────────────────────────────────────────────────────────
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -81,34 +82,31 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [resetMode, setResetMode] = useState(false)
-  const [resetLoading, setResetLoading] = useState(false)
+  
   const navigate = useNavigate()
   const location = useLocation()
 
-  // Redirect if already logged in as admin
+  // Redirect if already logged in
   useEffect(() => {
+    let cancelled = false
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession()
-      if (session?.user?.user_metadata?.role === 'admin') {
-        const from = location.state?.from?.pathname || '/admin'
-        navigate(from, { replace: true })
+      if (cancelled) return
+      if (session?.user && isAdmin(session.user)) {
+        navigate(safeAdminPath(location.state?.from?.pathname), { replace: true })
       }
     }
     checkSession()
-  }, [navigate, location])
+    return () => { cancelled = true }
+  }, [navigate, location.state])
 
   const showToast = (message, type = 'success') => {
     toast[type](message, {
-      position: 'top-center',
-      autoClose: 4000,
+      position: 'top-center', autoClose: 4000,
       style: {
-        fontFamily: "'Bebas Neue', sans-serif",
-        fontSize: '13px',
-        letterSpacing: '0.25em',
-        backgroundColor: '#FDFAF3',
-        color: type === 'success' ? '#2D5A2E' : '#D4651F',
-        border: `1px solid ${type === 'success' ? '#2D5A2E' : '#D4651F'}`,
-        borderRadius: 0,
+        fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', letterSpacing: '0.25em',
+        backgroundColor: '#FDFAF3', color: type === 'success' ? '#2D5A2E' : '#D4651F',
+        border: `1px solid ${type === 'success' ? '#2D5A2E' : '#D4651F'}`, borderRadius: 0,
       },
     })
   }
@@ -116,32 +114,33 @@ export default function Login() {
   const handleLogin = async (e) => {
     e.preventDefault()
     if (loading) return
+
+    const trimmed = email.trim().toLowerCase()
+    if (!trimmed || trimmed.length > MAX_EMAIL_LEN) {
+      showToast('ENTER A VALID EMAIL', 'error')
+      return
+    }
+    if (!password || password.length < MIN_PASSWORD_LEN) {
+      showToast('INVALID EMAIL OR PASSWORD', 'error')
+      return
+    }
+
     setLoading(true)
-
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
-      })
-
+      const { data, error } = await supabase.auth.signInWithPassword({ email: trimmed, password })
       if (error) throw error
 
-      // Check admin role
-      const role = data.user?.user_metadata?.role
-      if (role !== 'admin') {
+      if (!isAdmin(data.user)) {
         await supabase.auth.signOut()
-        throw new Error('ACCESS DENIED — NOT AN ADMIN ACCOUNT')
+        throw new Error('INVALID EMAIL OR PASSWORD')
       }
 
       showToast('WELCOME BACK', 'success')
-
-      const from = location.state?.from?.pathname || '/admin'
-      setTimeout(() => navigate(from, { replace: true }), 500)
+      setTimeout(() => navigate(safeAdminPath(location.state?.from?.pathname), { replace: true }), 500)
     } catch (err) {
-      const msg =
-        err.message === 'Invalid login credentials'
-          ? 'INVALID EMAIL OR PASSWORD'
-          : err.message?.toUpperCase() || 'LOGIN FAILED — PLEASE TRY AGAIN'
+      const raw = err?.message || ''
+      const msg = raw === 'Invalid login credentials' || raw === 'INVALID EMAIL OR PASSWORD'
+          ? 'INVALID EMAIL OR PASSWORD' : 'LOGIN FAILED — PLEASE TRY AGAIN'
       showToast(msg, 'error')
     } finally {
       setLoading(false)
@@ -150,288 +149,164 @@ export default function Login() {
 
   const handlePasswordReset = async (e) => {
     e.preventDefault()
-    if (resetLoading) return
+    if (loading) return
 
-    if (!email.trim()) {
+    const trimmed = email.trim().toLowerCase()
+    if (!trimmed) {
       showToast('ENTER YOUR EMAIL FIRST', 'error')
       return
     }
 
-    setResetLoading(true)
-
+    setLoading(true)
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      const { error } = await supabase.auth.resetPasswordForEmail(trimmed, {
         redirectTo: `${window.location.origin}/admin/reset-password`,
       })
-
       if (error) throw error
-
-      showToast('RESET LINK SENT — CHECK YOUR EMAIL', 'success')
+      showToast('IF THAT EMAIL EXISTS, A RESET LINK WAS SENT', 'success')
       setResetMode(false)
-    } catch (err) {
-      showToast(
-        err.message?.toUpperCase() || 'FAILED TO SEND RESET LINK',
-        'error'
-      )
+      setPassword('')
+    } catch {
+      showToast('IF THAT EMAIL EXISTS, A RESET LINK WAS SENT', 'success')
     } finally {
-      setResetLoading(false)
+      setLoading(false)
     }
   }
 
   return (
-    <div
-      className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden"
-      style={{ backgroundColor: '#F4EFE6', color: '#1A1A18' }}
-    >
-      {/* Background watermarks */}
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden" style={{ backgroundColor: '#F4EFE6', color: '#1A1A18' }}>
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
           <ManweSerpentM size={600} opacity={0.03} />
         </div>
       </div>
 
-      {/* Top flag strip */}
-      <div className="absolute top-0 left-0 right-0 z-10">
-        <FlagStrip />
-      </div>
+      <div className="absolute top-0 left-0 right-0 z-10"><FlagStrip /></div>
 
-      {/* Login card */}
-      <div className="w-full max-w-md relative z-10">
-
+      <div className="w-full max-w-md relative z-10 animate-fade-in-up">
         {/* Header */}
         <div className="flex flex-col items-center mb-8">
           <ManweSerpentM size={60} opacity={1} />
-
           <div className="flex items-center gap-3 mt-6 mb-4">
-            <div className="w-10 h-px bg-[#2D5A2E]" />
-            <AdinkraDiamond size={7} fill="#D4651F" opacity={1} />
-            <span
-              className="text-[#2D5A2E]"
-              style={{
-                fontFamily: "'Bebas Neue', sans-serif",
-                fontSize: '11px',
-                letterSpacing: '0.4em',
-              }}
-            >
+            <div className="w-10 h-px bg-[#2D5A2E]" /><AdinkraDiamond size={7} fill="#D4651F" opacity={1} />
+            <span className="text-[#2D5A2E]" style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '11px', letterSpacing: '0.4em' }}>
               {resetMode ? 'RESET ACCESS' : 'ADMIN ACCESS'}
             </span>
-            <AdinkraDiamond size={7} fill="#D4651F" opacity={1} />
-            <div className="w-10 h-px bg-[#D4651F]" />
+            <AdinkraDiamond size={7} fill="#D4651F" opacity={1} /><div className="w-10 h-px bg-[#D4651F]" />
           </div>
-
-          <h1
-            className="text-center leading-none"
-            style={{
-              fontFamily: "'Bebas Neue', sans-serif",
-              fontSize: 'clamp(36px, 7vw, 56px)',
-              letterSpacing: '0.05em',
-            }}
-          >
-            <ManweGradientText fontSize="clamp(36px, 7vw, 56px)" letterSpacing="0.05em">
+          <h1 className="text-center leading-none" style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(36px, 7vw, 56px)', letterSpacing: '0.05em' }}>
+            <ManweGradientText fontSize="clamp(36px, 7vw, 56px)">
               {resetMode ? 'RESET' : 'MANWE'}
             </ManweGradientText>
           </h1>
-
-          <p
-            className="text-[#8B8577] mt-3 font-mono text-[10px] tracking-[0.4em]"
-          >
+          <p className="text-[#8B8577] mt-3 font-mono text-[10px] tracking-[0.4em]">
             {resetMode ? 'WE WILL EMAIL YOU A LINK' : 'THE TRIBE HEADQUARTERS'}
           </p>
         </div>
 
-        {/* Form card */}
-        <div
-          className="relative border border-[#D9D2C4] p-7"
-          style={{ backgroundColor: '#FDFAF3' }}
-        >
-          {/* Corner diamonds */}
-          <span className="absolute -top-1 -left-1">
-            <AdinkraDiamond size={7} fill="#2D5A2E" opacity={1} />
-          </span>
-          <span className="absolute -top-1 -right-1">
-            <AdinkraDiamond size={7} fill="#D4651F" opacity={1} />
-          </span>
-          <span className="absolute -bottom-1 -left-1">
-            <AdinkraDiamond size={7} fill="#D4651F" opacity={1} />
-          </span>
-          <span className="absolute -bottom-1 -right-1">
-            <AdinkraDiamond size={7} fill="#2D5A2E" opacity={1} />
-          </span>
+        {/* Form */}
+        <div className="relative border border-[#D9D2C4] p-7 shadow-sm transition-all duration-300" style={{ backgroundColor: '#FDFAF3' }}>
+          <span className="absolute -top-1 -left-1"><AdinkraDiamond size={7} fill="#2D5A2E" /></span>
+          <span className="absolute -top-1 -right-1"><AdinkraDiamond size={7} fill="#D4651F" /></span>
+          <span className="absolute -bottom-1 -left-1"><AdinkraDiamond size={7} fill="#D4651F" /></span>
+          <span className="absolute -bottom-1 -right-1"><AdinkraDiamond size={7} fill="#2D5A2E" /></span>
 
-          <form
-            onSubmit={resetMode ? handlePasswordReset : handleLogin}
-            className="flex flex-col gap-5"
-          >
-            {/* Email */}
+          <form onSubmit={resetMode ? handlePasswordReset : handleLogin} className="flex flex-col gap-5">
             <div className="flex flex-col gap-2">
-              <label
-                className="text-[#6B6558] flex items-center gap-2"
-                style={{
-                  fontFamily: "'Bebas Neue', sans-serif",
-                  fontSize: '10px',
-                  letterSpacing: '0.3em',
-                }}
-              >
-                EMAIL
-                <AdinkraDiamond size={4} fill="#D4651F" opacity={1} />
+              <label htmlFor="admin-email" className="text-[#6B6558] flex items-center gap-2" style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '10px', letterSpacing: '0.3em' }}>
+                EMAIL <AdinkraDiamond size={4} fill="#D4651F" />
               </label>
-              <div
-                className="flex items-center gap-3 border border-[#D9D2C4] focus-within:border-[#1A1A18] transition-colors px-4"
-                style={{ backgroundColor: '#F4EFE6' }}
-              >
-                <Mail size={16} className="text-[#8B8577] shrink-0" />
+              <div className="flex items-center gap-3 border border-[#D9D2C4] focus-within:border-[#1A1A18] focus-within:shadow-sm transition-all px-4" style={{ backgroundColor: '#F4EFE6' }}>
+                <Mail size={16} className="text-[#8B8577] shrink-0" aria-hidden />
                 <input
+                  id="admin-email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="admin@manweofficial.com.ng"
                   required
                   autoComplete="username"
+                  autoFocus
+                  maxLength={MAX_EMAIL_LEN}
                   className="flex-1 bg-transparent outline-none py-3 text-[#1A1A18] placeholder:text-[#B5AE9E]"
-                  style={{
-                    fontFamily: "'Bebas Neue', sans-serif",
-                    fontSize: '15px',
-                    letterSpacing: '0.1em',
-                  }}
+                  style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '15px', letterSpacing: '0.1em' }}
                 />
               </div>
             </div>
 
-            {/* Password — hidden in reset mode */}
             {!resetMode && (
-              <div className="flex flex-col gap-2">
-                <label
-                  className="text-[#6B6558] flex items-center gap-2"
-                  style={{
-                    fontFamily: "'Bebas Neue', sans-serif",
-                    fontSize: '10px',
-                    letterSpacing: '0.3em',
-                  }}
-                >
-                  PASSWORD
-                  <AdinkraDiamond size={4} fill="#D4651F" opacity={1} />
+              <div className="flex flex-col gap-2 animate-fade-in">
+                <label htmlFor="admin-password" className="text-[#6B6558] flex items-center gap-2" style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '10px', letterSpacing: '0.3em' }}>
+                  PASSWORD <AdinkraDiamond size={4} fill="#D4651F" />
                 </label>
-                <div
-                  className="flex items-center gap-3 border border-[#D9D2C4] focus-within:border-[#1A1A18] transition-colors px-4"
-                  style={{ backgroundColor: '#F4EFE6' }}
-                >
-                  <Lock size={16} className="text-[#8B8577] shrink-0" />
+                <div className="flex items-center gap-3 border border-[#D9D2C4] focus-within:border-[#1A1A18] focus-within:shadow-sm transition-all px-4" style={{ backgroundColor: '#F4EFE6' }}>
+                  <Lock size={16} className="text-[#8B8577] shrink-0" aria-hidden />
                   <input
+                    id="admin-password"
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter your password"
                     required
                     autoComplete="current-password"
+                    minLength={MIN_PASSWORD_LEN}
                     className="flex-1 bg-transparent outline-none py-3 text-[#1A1A18] placeholder:text-[#B5AE9E]"
-                    style={{
-                      fontFamily: "'Bebas Neue', sans-serif",
-                      fontSize: '15px',
-                      letterSpacing: '0.1em',
-                    }}
+                    style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '15px', letterSpacing: '0.1em' }}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((s) => !s)}
-                    className="text-[#8B8577] hover:text-[#1A1A18] transition-colors shrink-0"
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  >
+                  <button type="button" onClick={() => setShowPassword((s) => !s)} className="text-[#8B8577] hover:text-[#1A1A18] transition-colors shrink-0">
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
               </div>
             )}
 
-            {/* Submit button */}
-            <button
-              type="submit"
-              disabled={loading || resetLoading}
-              className={`
-                group relative flex items-center justify-center gap-4 border px-8 py-4 transition-all duration-300 mt-2
-                ${
-                  loading || resetLoading
-                    ? 'border-[#D9D2C4] cursor-not-allowed opacity-50'
-                    : 'border-[#1A1A18]/40 hover:border-[#1A1A18] hover:bg-[#1A1A18]'
-                }
-              `}
-            >
-              {!loading && !resetLoading && (
-                <>
-                  <span className="absolute -top-1 -left-1">
-                    <AdinkraDiamond size={6} fill="#2D5A2E" opacity={0.8} />
-                  </span>
-                  <span className="absolute -top-1 -right-1">
-                    <AdinkraDiamond size={6} fill="#D4651F" opacity={0.8} />
-                  </span>
-                  <span className="absolute -bottom-1 -left-1">
-                    <AdinkraDiamond size={6} fill="#D4651F" opacity={0.8} />
-                  </span>
-                  <span className="absolute -bottom-1 -right-1">
-                    <AdinkraDiamond size={6} fill="#2D5A2E" opacity={0.8} />
-                  </span>
-                </>
-              )}
+            <div className="mt-2 space-y-3">
+              <Button
+                type="submit"
+                fullWidth
+                size="lg"
+                loading={loading}
+                icon={resetMode ? Send : LogIn}
+                withDiamonds
+              >
+                {resetMode ? 'SEND RESET LINK' : 'SIGN IN'}
+              </Button>
 
-              {loading || resetLoading ? (
-                <>
-                  <Loader2 className="animate-spin text-[#6B6558]" size={16} />
-                  <span
-                    className="text-[#6B6558]"
-                    style={{
-                      fontFamily: "'Bebas Neue', sans-serif",
-                      fontSize: '15px',
-                      letterSpacing: '0.35em',
-                    }}
-                  >
-                    {resetMode ? 'SENDING...' : 'SIGNING IN...'}
-                  </span>
-                </>
-              ) : (
-                <>
-                  <span
-                    className="text-[#1A1A18] group-hover:text-[#F4EFE6] transition-colors"
-                    style={{
-                      fontFamily: "'Bebas Neue', sans-serif",
-                      fontSize: '15px',
-                      letterSpacing: '0.35em',
-                    }}
-                  >
-                    {resetMode ? 'SEND RESET LINK' : 'SIGN IN'}
-                  </span>
-                  <span className="text-[#D4651F] group-hover:text-[#F4EFE6] transition-colors font-mono">
-                    →
-                  </span>
-                </>
-              )}
-            </button>
-
-            {/* Toggle reset / login mode */}
-            <button
-              type="button"
-              onClick={() => setResetMode((r) => !r)}
-              className="text-[#6B6558] hover:text-[#1A1A18] transition-colors mt-1"
-              style={{
-                fontFamily: "'Bebas Neue', sans-serif",
-                fontSize: '11px',
-                letterSpacing: '0.3em',
-              }}
-            >
-              {resetMode ? '← BACK TO SIGN IN' : 'FORGOT PASSWORD ?'}
-            </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setResetMode((r) => !r)
+                  setError(null)
+                }}
+                className="w-full text-center text-[#6B6558] hover:text-[#1A1A18] transition-colors py-2"
+                style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '11px', letterSpacing: '0.3em' }}
+              >
+                {resetMode ? '← BACK TO SIGN IN' : 'FORGOT PASSWORD ?'}
+              </button>
+            </div>
           </form>
         </div>
 
-        {/* Bottom flag strip */}
         <div className="mt-8 flex items-center justify-center gap-3">
           <FlagStrip className="w-20 h-0.5" />
-          <span className="font-mono text-[#B5AE9E] text-[9px] tracking-[0.4em]">
-            NGR × CIV
-          </span>
+          <span className="font-mono text-[#B5AE9E] text-[9px] tracking-[0.4em]">NGR × CIV</span>
           <FlagStrip className="w-20 h-0.5" />
         </div>
       </div>
 
       <ToastContainer />
+      <style>{`
+        @keyframes fade-in-up {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fade-in {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        .animate-fade-in-up { animation: fade-in-up 0.4s ease-out forwards; }
+        .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
+      `}</style>
     </div>
   )
 }

@@ -2,6 +2,697 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── BASE STYLES & TYPOGRAPHY ──────────────────────────────────────────────── */
+
 body {
-  @apply font-montserrat;
+  @apply font-montserrat bg-[#080808] text-[#E8E3D8] antialiased selection:bg-[#C4541A] selection:text-white overflow-x-hidden;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+*:focus-visible {
+  @apply outline-none ring-2 ring-[#C4541A] ring-offset-2 ring-offset-[#080808];
+}
+
+/* ─── MANWE STREETWEAR ANIMATION SYSTEM ────────────────────────────────────── */
+
+/* 1. TICKER / MARQUEE */
+@keyframes manwe-marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.manwe-marquee {
+  animation: manwe-marquee 30s linear infinite;
+}
+.manwe-marquee-fast {
+  animation: manwe-marquee 15s linear infinite;
+}
+.manwe-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* 2. GLITCH TEXT */
+@keyframes manwe-glitch-1 {
+  0%, 100% { clip-path: inset(0 0 0 0); transform: translate(0); }
+  20% { clip-path: inset(20% 0 30% 0); transform: translate(-2px, 1px); }
+  40% { clip-path: inset(50% 0 20% 0); transform: translate(2px, -1px); }
+  60% { clip-path: inset(10% 0 60% 0); transform: translate(-1px, 2px); }
+  80% { clip-path: inset(70% 0 10% 0); transform: translate(1px, -2px); }
+}
+@keyframes manwe-glitch-2 {
+  0%, 100% { clip-path: inset(0 0 0 0); transform: translate(0); }
+  25% { clip-path: inset(40% 0 40% 0); transform: translate(2px, 0); }
+  50% { clip-path: inset(60% 0 10% 0); transform: translate(-2px, 1px); }
+  75% { clip-path: inset(30% 0 50% 0); transform: translate(1px, -1px); }
+}
+.manwe-glitch {
+  position: relative;
+  display: inline-block;
+}
+.manwe-glitch::before,
+.manwe-glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+.manwe-glitch::before {
+  color: #1A5C2A;
+  animation: manwe-glitch-1 3s infinite linear alternate-reverse;
+  z-index: -1;
+}
+.manwe-glitch::after {
+  color: #C4541A;
+  animation: manwe-glitch-2 2.5s infinite linear alternate-reverse;
+  z-index: -2;
+}
+
+/* 3. GRAFFITI STAMP */
+@keyframes manwe-stamp {
+  0% {
+    opacity: 0;
+    transform: scale(1.4) rotate(-6deg);
+    filter: blur(8px);
+  }
+  65% {
+    opacity: 1;
+    transform: scale(0.96) rotate(1deg);
+    filter: blur(0);
+  }
+  85% {
+    transform: scale(1.02) rotate(-0.5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+    filter: blur(0);
+  }
+}
+.manwe-stamp {
+  animation: manwe-stamp 0.65s cubic-bezier(0.25, 1, 0.5, 1) both;
+}
+.manwe-stamp-delay-1 { animation-delay: 80ms; }
+.manwe-stamp-delay-2 { animation-delay: 160ms; }
+.manwe-stamp-delay-3 { animation-delay: 240ms; }
+.manwe-stamp-delay-4 { animation-delay: 320ms; }
+.manwe-stamp-delay-5 { animation-delay: 400ms; }
+
+/* 4. TAPE REVEAL */
+@keyframes manwe-tape-reveal {
+  0% {
+    clip-path: inset(0 100% 0 0);
+    transform: translateX(-15px);
+  }
+  100% {
+    clip-path: inset(0 0 0 0);
+    transform: translateX(0);
+  }
+}
+.manwe-tape {
+  animation: manwe-tape-reveal 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* 5. SPRAY-PAINT UNDERLINE */
+.manwe-link {
+  position: relative;
+  display: inline-block;
+}
+.manwe-link::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, #1A5C2A 0%, #C4541A 100%);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.manwe-link:hover::after {
+  transform: scaleX(1);
+}
+
+/* 6. GRAVITY DROP */
+@keyframes manwe-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(-80px) scale(0.95);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(12px) scale(1.01);
+  }
+  80% {
+    transform: translateY(-4px) scale(0.995);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.manwe-drop {
+  animation: manwe-drop 1s cubic-bezier(0.25, 1.25, 0.5, 1) both;
+}
+
+/* 7. STREET SHAKE */
+@keyframes manwe-shake {
+  0%, 100% { transform: translateX(0) rotate(0); }
+  25% { transform: translateX(-2px) rotate(-0.5deg); }
+  50% { transform: translateX(2px) rotate(0.5deg); }
+  75% { transform: translateX(-1px) rotate(-0.3deg); }
+}
+.manwe-shake-hover:hover {
+  animation: manwe-shake 0.35s ease-in-out;
+}
+
+/* 8. WARNING DIAGONAL TAPE */
+.manwe-tape-bar {
+  background: repeating-linear-gradient(
+    45deg,
+    #C4541A,
+    #C4541A 12px,
+    #080808 12px,
+    #080808 24px
+  );
+}
+
+/* 9. FILM NOISE OVERLAY */
+@keyframes manwe-noise {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-2%, -2%); }
+  20% { transform: translate(-4%, 2%); }
+  30% { transform: translate(2%, -4%); }
+  40% { transform: translate(-2%, 6%); }
+  50% { transform: translate(-4%, 2%); }
+  60% { transform: translate(6%, 0); }
+  70% { transform: translate(0, 4%); }
+  80% { transform: translate(-6%, 0); }
+  90% { transform: translate(4%, 2%); }
+}
+.manwe-noise {
+  position: relative;
+}
+.manwe-noise::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
+  opacity: 0.06;
+  pointer-events: none;
+  animation: manwe-noise 6s steps(8) infinite;
+  z-index: 1;
+}
+
+/* 10. SCROLL REVEAL */
+.manwe-reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.manwe-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 11. LOADER SPIN */
+@keyframes manwe-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.animate-spin {
+  animation: spin 0.8s linear infinite;
+}
+.manwe-spin {
+  animation: manwe-spin 5s linear infinite;
+}
+.manwe-spin-reverse {
+  animation: manwe-spin 3s linear infinite reverse;
+}
+
+/* 12. DUAL-NATION MARQUEE — Nigeria × Côte d'Ivoire */
+@keyframes manwe-nation-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+    filter: saturate(1) brightness(1);
+  }
+  25% {
+    background-position: 50% 50%;
+    filter: saturate(1.15) brightness(1.05);
+  }
+  50% {
+    background-position: 100% 50%;
+    filter: saturate(1.05) brightness(0.98);
+  }
+  75% {
+    background-position: 50% 50%;
+    filter: saturate(1.2) brightness(1.08);
+  }
+}
+
+@keyframes manwe-nation-sheen {
+  0%   { transform: translateX(-120%) skewX(-18deg); opacity: 0; }
+  40%  { opacity: 0.35; }
+  100% { transform: translateX(120%) skewX(-18deg); opacity: 0; }
+}
+
+@keyframes manwe-mq-pulse-ng {
+  0%, 100% { color: #E8E3D8; text-shadow: 0 0 0 transparent; }
+  50%      { color: #b8e0c0; text-shadow: 0 0 12px rgba(26, 92, 42, 0.55); }
+}
+
+@keyframes manwe-mq-pulse-civ {
+  0%, 100% { color: #E8E3D8; text-shadow: 0 0 0 transparent; }
+  50%      { color: #f0c4a8; text-shadow: 0 0 12px rgba(196, 84, 26, 0.55); }
+}
+
+@keyframes manwe-chip-glow-ng {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(26, 92, 42, 0); }
+  50%      { box-shadow: 0 0 10px 1px rgba(26, 92, 42, 0.55); }
+}
+
+@keyframes manwe-chip-glow-civ {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(196, 84, 26, 0); }
+  50%      { box-shadow: 0 0 10px 1px rgba(196, 84, 26, 0.55); }
+}
+
+.manwe-nation-marquee {
+  isolation: isolate;
+  cursor: default;
+}
+
+.manwe-nation-marquee__bg {
+  background: linear-gradient(
+    115deg,
+    #0d3d1c 0%,
+    #1A5C2A 14%,
+    #2a6b38 22%,
+    #E8E3D8 36%,
+    #C4541A 50%,
+    #E8E3D8 64%,
+    #1A5C2A 78%,
+    #0f4a22 90%,
+    #C4541A 100%
+  );
+  background-size: 280% 100%;
+  animation: manwe-nation-shift 14s ease-in-out infinite;
+  transition: filter 0.5s ease, background 0.6s ease;
+}
+
+.manwe-nation-marquee:hover .manwe-nation-marquee__bg {
+  animation-duration: 4s;
+  filter: saturate(1.45) brightness(1.12) contrast(1.08);
+  background: linear-gradient(
+    115deg,
+    #C4541A 0%,
+    #E8E3D8 18%,
+    #1A5C2A 34%,
+    #0d3d1c 48%,
+    #C4541A 62%,
+    #E8E3D8 78%,
+    #1A5C2A 100%
+  );
+  background-size: 280% 100%;
+}
+
+.manwe-nation-marquee__sheen {
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    rgba(232, 227, 216, 0.0) 35%,
+    rgba(232, 227, 216, 0.45) 50%,
+    rgba(232, 227, 216, 0.0) 65%,
+    transparent 100%
+  );
+  mix-blend-mode: soft-light;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.manwe-nation-marquee:hover .manwe-nation-marquee__sheen {
+  opacity: 1;
+  animation: manwe-nation-sheen 1.4s ease-in-out infinite;
+}
+
+.manwe-mq-text {
+  color: #080808;
+  transition: color 0.35s ease, text-shadow 0.35s ease, letter-spacing 0.35s ease;
+}
+
+.manwe-mq-text--core {
+  color: #080808;
+  font-weight: 700;
+}
+
+.manwe-mq-text--ng {
+  color: #062412;
+  animation: manwe-mq-pulse-ng 3.2s ease-in-out infinite;
+}
+
+.manwe-mq-text--civ {
+  color: #3a1406;
+  animation: manwe-mq-pulse-civ 3.2s ease-in-out infinite 0.6s;
+}
+
+.manwe-mq-text--cross {
+  color: #080808;
+  letter-spacing: 0.42em;
+}
+
+.manwe-mq-sep {
+  color: rgba(8, 8, 8, 0.45);
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.manwe-nation-marquee:hover .manwe-mq-text--core,
+.manwe-nation-marquee:hover .manwe-mq-text--cross {
+  color: #E8E3D8;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+}
+
+.manwe-nation-marquee:hover .manwe-mq-text--ng {
+  color: #7dcea0;
+  animation: none;
+  text-shadow: 0 0 14px rgba(26, 92, 42, 0.8);
+}
+
+.manwe-nation-marquee:hover .manwe-mq-text--civ {
+  color: #f0a070;
+  animation: none;
+  text-shadow: 0 0 14px rgba(196, 84, 26, 0.8);
+}
+
+.manwe-nation-marquee:hover .manwe-mq-sep {
+  color: rgba(232, 227, 216, 0.7);
+}
+
+.manwe-flag-chip {
+  display: inline-flex;
+  width: 18px;
+  height: 12px;
+  border-radius: 1px;
+  overflow: hidden;
+  border: 1px solid rgba(8, 8, 8, 0.35);
+  flex-shrink: 0;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
+}
+
+.manwe-flag-chip i {
+  flex: 1;
+  display: block;
+  height: 100%;
+}
+
+.manwe-flag-chip--ng {
+  animation: manwe-chip-glow-ng 3.2s ease-in-out infinite;
+}
+.manwe-flag-chip--ng i:nth-child(1) { background: #1A5C2A; }
+.manwe-flag-chip--ng i:nth-child(2) { background: #E8E3D8; }
+.manwe-flag-chip--ng i:nth-child(3) { background: #1A5C2A; }
+
+.manwe-flag-chip--civ {
+  animation: manwe-chip-glow-civ 3.2s ease-in-out infinite 0.6s;
+}
+.manwe-flag-chip--civ i:nth-child(1) { background: #C4541A; }
+.manwe-flag-chip--civ i:nth-child(2) { background: #E8E3D8; }
+.manwe-flag-chip--civ i:nth-child(3) { background: #1A5C2A; }
+
+.manwe-nation-marquee:hover .manwe-flag-chip {
+  transform: scale(1.25) rotate(-4deg);
+  border-color: rgba(232, 227, 216, 0.6);
+  animation: none;
+}
+
+.manwe-nation-marquee:hover .manwe-flag-chip--civ {
+  transform: scale(1.25) rotate(4deg);
+}
+
+.manwe-nation-marquee:hover .manwe-marquee {
+  animation-play-state: paused;
+}
+
+/* ─── 13. PRODUCT CARD — CINEMATIC ─────────────────────────────────────────── */
+
+.manwe-card {
+  isolation: isolate;
+}
+
+.manwe-card__frame {
+  transform: translateZ(0);
+  will-change: transform;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.manwe-card:hover .manwe-card__frame {
+  transform: translateY(-4px);
+}
+
+.manwe-card__border {
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  background: linear-gradient(
+    130deg,
+    rgba(26, 92, 42, 0.5) 0%,
+    rgba(232, 227, 216, 0.15) 35%,
+    rgba(196, 84, 26, 0.5) 70%,
+    rgba(26, 92, 42, 0.4) 100%
+  );
+  background-size: 220% 220%;
+  background-position: 0% 50%;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.55;
+  transition: opacity 0.5s ease, background-position 1.4s ease;
+  z-index: 5;
+}
+.manwe-card:hover .manwe-card__border {
+  opacity: 1;
+  background-position: 100% 50%;
+}
+
+.manwe-card__glow {
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(60% 45% at 20% 10%, rgba(26, 92, 42, 0.25), transparent 60%),
+    radial-gradient(55% 45% at 85% 90%, rgba(196, 84, 26, 0.28), transparent 60%);
+  filter: blur(20px);
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+.manwe-card:hover .manwe-card__glow {
+  opacity: 1;
+}
+
+.manwe-card__vignette {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 45%;
+  background: linear-gradient(to top, rgba(8, 8, 8, 0.75) 0%, rgba(8, 8, 8, 0) 100%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  z-index: 4;
+  pointer-events: none;
+}
+.manwe-card:hover .manwe-card__vignette {
+  opacity: 1;
+}
+
+.manwe-card__img {
+  filter: saturate(0.95) contrast(1.02);
+  transition: filter 0.6s ease, transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.9s ease;
+  z-index: 2;
+}
+.manwe-card:hover .manwe-card__img {
+  filter: saturate(1.15) contrast(1.06);
+}
+
+.manwe-card__idchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: rgba(8, 8, 8, 0.6);
+  border: 1px solid rgba(232, 227, 216, 0.08);
+  backdrop-filter: blur(6px);
+}
+
+.manwe-card__badge {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.32em;
+  padding: 3px 8px;
+  border: 1px solid;
+  backdrop-filter: blur(6px);
+}
+.manwe-card__badge--new {
+  color: #E8E3D8;
+  background: rgba(26, 92, 42, 0.55);
+  border-color: rgba(232, 227, 216, 0.3);
+}
+.manwe-card__badge--oos {
+  color: #E8E3D8;
+  background: rgba(196, 84, 26, 0.5);
+  border-color: rgba(232, 227, 216, 0.3);
+}
+
+.manwe-card__cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border: 1px solid rgba(232, 227, 216, 0.35);
+  background: rgba(8, 8, 8, 0.55);
+  backdrop-filter: blur(8px);
+}
+.manwe-card__cta-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.manwe-card:hover .manwe-card__cta-arrow {
+  transform: translateX(4px);
+}
+
+.manwe-card__title {
+  position: relative;
+  display: inline-block;
+}
+.manwe-card__title::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, #1A5C2A 0%, #E8E3D8 50%, #C4541A 100%);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.manwe-card:hover .manwe-card__title::after {
+  transform: scaleX(1);
+}
+
+@keyframes manwe-shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.manwe-shimmer,
+.manwe-card__shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(232, 227, 216, 0.045) 50%,
+    transparent 100%
+  );
+  animation: manwe-shimmer 1.4s linear infinite;
+  z-index: 3;
+}
+
+/* ─── 14. FREIGHT & CUSTOMS TICKER — Logistics Scanner ─────────────────────── */
+
+.manwe-freight {
+  cursor: crosshair;
+}
+
+/* Scanner laser sweep */
+.manwe-laser {
+  left: -10%;
+  box-shadow:
+    0 0 20px 4px rgba(196, 84, 26, 0.9),
+    0 0 50px 12px rgba(196, 84, 26, 0.4);
+}
+.manwe-freight:hover .manwe-laser {
+  animation: manwe-laser-scan 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes manwe-laser-scan {
+  0%   { left: -5%; opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { left: 105%; opacity: 0; }
+}
+
+/* Fake barcode stretches like a scan */
+.manwe-barcode-bars {
+  transform-origin: bottom;
+  transform: scaleY(1);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), color 0.4s ease;
+}
+.manwe-freight:hover .manwe-barcode-bars {
+  transform: scaleY(2.2);
+  color: #E8E3D8;
+}
+
+/* Glowing status text */
+.manwe-text-glow-green {
+  text-shadow: 0 0 10px rgba(26, 92, 42, 0.75);
+}
+
+/* ─── Accessibility: Unified Reduced Motion Block ──────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  body {
+    scroll-behavior: auto !important;
+  }
+  .manwe-marquee,
+  .manwe-marquee-fast,
+  .manwe-glitch::before,
+  .manwe-glitch::after,
+  .manwe-stamp,
+  .manwe-tape,
+  .manwe-drop,
+  .manwe-shake-hover:hover,
+  .manwe-noise::before,
+  .manwe-reveal,
+  .animate-spin,
+  .manwe-spin,
+  .manwe-spin-reverse,
+  .manwe-nation-marquee__bg,
+  .manwe-nation-marquee__sheen,
+  .manwe-mq-text--ng,
+  .manwe-mq-text--civ,
+  .manwe-flag-chip--ng,
+  .manwe-flag-chip--civ,
+  .manwe-card__frame,
+  .manwe-card__img,
+  .manwe-card__border,
+  .manwe-card__glow,
+  .manwe-card__vignette,
+  .manwe-card__cta-arrow,
+  .manwe-card__title::after,
+  .manwe-shimmer,
+  .manwe-card__shimmer,
+  .manwe-laser,
+  .manwe-barcode-bars {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+    clip-path: none !important;
+  }
+  .manwe-freight:hover .manwe-laser {
+    opacity: 0 !important;
+  }
+  .manwe-nation-marquee__bg {
+    background: linear-gradient(90deg, #1A5C2A 0%, #E8E3D8 35%, #C4541A 65%, #1A5C2A 100%);
+    background-size: 100% 100%;
+  }
 }

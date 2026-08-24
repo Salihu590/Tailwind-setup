@@ -50,7 +50,11 @@ async function verifyAdminToken(req: Request): Promise<boolean> {
     if (!res.ok) return false
 
     const user = await res.json()
-    return user?.user_metadata?.role === 'admin'
+    // Checks both metadata fields for safety
+    return (
+      user?.app_metadata?.role === 'admin' ||
+      user?.user_metadata?.role === 'admin'
+    )
   } catch (err) {
     console.error('verifyAdminToken error:', err)
     return false
@@ -118,7 +122,7 @@ const emailStyles = `
       -webkit-text-fill-color: transparent;
       background-clip: text;
       color: ${COLORS.charcoal};
-      margin: 12px 0 6px;
+      margin: 16px 0 6px;
     }
     .header .tagline {
       font-family: 'Arial', sans-serif;
@@ -161,13 +165,6 @@ const emailStyles = `
       color: ${COLORS.textSoft};
       margin: 0 0 14px;
     }
-    .content strong {
-      color: ${COLORS.charcoal};
-      font-family: 'Arial', sans-serif;
-      font-size: 12px;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-    }
 
     .divider {
       display: flex;
@@ -193,31 +190,13 @@ const emailStyles = `
       padding: 14px 16px;
       margin: 16px 0;
     }
-    .info-block strong { display: block; margin-bottom: 4px; }
-
-    .items-list {
-      list-style: none;
-      padding: 0;
-      margin: 16px 0;
-    }
-    .items-list li {
-      padding: 14px 0;
-      border-bottom: 1px solid ${COLORS.border};
-      font-family: Georgia, serif;
-      font-size: 14px;
+    .info-block strong { 
+      display: block; 
+      margin-bottom: 4px; 
       color: ${COLORS.charcoal};
-    }
-    .items-list li:last-child { border-bottom: none; }
-    .items-list li strong {
-      display: block;
-      margin-bottom: 4px;
-      color: ${COLORS.charcoal};
-    }
-    .items-list li .meta {
       font-family: 'Arial', sans-serif;
-      font-size: 10px;
-      letter-spacing: 2px;
-      color: ${COLORS.textMuted};
+      font-size: 12px;
+      letter-spacing: 1.5px;
       text-transform: uppercase;
     }
 
@@ -297,20 +276,12 @@ const emailStyles = `
   </style>
 `
 
-/* ── MANWE Beast Emblem SVG (inline for email) ────────────────────────────── */
+/* ── Brand Logo HTML ──────────────────────────────────────────────────────── */
 
-const beastEmblemSvg = `
-<svg width="56" height="56" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto;">
-  <path d="M10 45 L5 25 L15 10 L25 5 L30 15 L25 30 L30 40" stroke="${COLORS.green}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-  <path d="M70 45 L75 25 L65 10 L55 5 L50 15 L55 30 L50 40" stroke="${COLORS.orange}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-  <path d="M30 40 L35 55 L40 35 L45 55 L50 40" stroke="${COLORS.charcoal}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-  <path d="M40 18 L48 30 L40 42 L32 30 Z" stroke="${COLORS.charcoal}" stroke-width="1.5" fill="none"/>
-  <circle cx="36" cy="28" r="1.5" fill="${COLORS.green}"/>
-  <circle cx="44" cy="28" r="1.5" fill="${COLORS.orange}"/>
-  <path d="M37 18 L40 8 L43 18" stroke="${COLORS.charcoal}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-  <line x1="40" y1="55" x2="40" y2="70" stroke="${COLORS.charcoal}" stroke-width="1.5" stroke-linecap="round"/>
-  <path d="M40 70 L43 74 L40 78 L37 74 Z" fill="${COLORS.charcoal}" opacity="0.7"/>
-</svg>
+const LOGO_URL = 'https://res.cloudinary.com/dsci2gspy/image/upload/v1756147657/WhatsApp_Image_2025-08-25_at_16.51.47_c686c776_aebbpo.jpg'
+
+const brandLogoHtml = `
+<img src="${LOGO_URL}" alt="MANWE Logo" width="60" height="60" style="display:block; margin:0 auto; border-radius:4px; object-fit:cover;" />
 `
 
 const flagStripHtml = `
@@ -345,6 +316,34 @@ const dividerHtml = `
 </div>
 `
 
+/* ── Order Items Builder (With Product Images) ────────────────────────────── */
+
+const buildOrderItemsHtml = (cartItems: any[]) => {
+  return cartItems
+    .map(
+      (item: any) => `
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 16px; border-bottom: 1px solid ${COLORS.border}; padding-bottom: 16px;">
+        <tr>
+          <!-- Product Image -->
+          <td width="70" valign="top">
+            <img src="${item.image || LOGO_URL}" alt="${item.name}" width="64" height="64" style="background:${COLORS.cream}; border:1px solid ${COLORS.border}; object-fit:contain; display:block;" />
+          </td>
+          <!-- Product Details -->
+          <td valign="middle" style="padding-left: 16px;">
+            <strong style="display:block; margin-bottom:6px; font-family:'Arial', sans-serif; font-size:13px; letter-spacing:1px; text-transform:uppercase; color:${COLORS.charcoal};">
+              ${item.name.toUpperCase()}
+            </strong>
+            <div style="font-family:'Arial', sans-serif; font-size:10px; letter-spacing:2px; color:${COLORS.textMuted}; text-transform:uppercase; line-height: 1.5;">
+              Size ${item.size || 'N/A'} · Qty ${item.quantity} <br/> 
+              <span style="color:${COLORS.charcoal}; font-weight:bold;">₦${(item.price * item.quantity).toLocaleString()}</span>
+            </div>
+          </td>
+        </tr>
+      </table>`
+    )
+    .join('')
+}
+
 /* ── Shared shell wrapping all emails ─────────────────────────────────────── */
 
 const emailShell = (label: string, contentHtml: string) => `
@@ -361,7 +360,7 @@ const emailShell = (label: string, contentHtml: string) => `
       ${flagStripHtml}
 
       <div class="header">
-        ${beastEmblemSvg}
+        ${brandLogoHtml}
         <div class="brand">MANWE</div>
         <p class="tagline">— West African Futurism —</p>
         <p class="label">◆ ${label} ◆</p>
@@ -391,18 +390,6 @@ const emailShell = (label: string, contentHtml: string) => `
    ═══════════════════════════════════════════════════════════════════════════ */
 
 const generateConfirmationEmail = (order: any) => {
-  const itemDetails = order.cart_items
-    .map(
-      (item: any) => `
-      <li>
-        <strong>${item.name.toUpperCase()}</strong>
-        <div class="meta">
-          Size ${item.size || 'N/A'} · Qty ${item.quantity} · ₦${(item.price * item.quantity).toLocaleString()}
-        </div>
-      </li>`
-    )
-    .join('')
-
   const content = `
     <h1>Welcome to the tribe</h1>
     <p>Hi ${order.checkout_data.firstName},</p>
@@ -417,7 +404,10 @@ const generateConfirmationEmail = (order: any) => {
     </div>
 
     <h2>Your Pieces</h2>
-    <ul class="items-list">${itemDetails}</ul>
+    <!-- Render Product Images & Details -->
+    <div style="margin-top: 16px;">
+      ${buildOrderItemsHtml(order.cart_items || [])}
+    </div>
 
     <div class="total-box">
       <div class="label">Total Paid</div>
@@ -483,16 +473,6 @@ const generateDeliveredEmail = (order: any) => {
 }
 
 const generateAdminNotification = (order: any) => {
-  const itemDetails = order.cart_items
-    .map(
-      (item: any) => `
-      <li>
-        <strong>${item.name.toUpperCase()}</strong>
-        <div class="meta">Qty ${item.quantity} — ₦${(item.price * item.quantity).toLocaleString()}</div>
-      </li>`
-    )
-    .join('')
-
   const content = `
     <h1>New order received</h1>
 
@@ -505,7 +485,9 @@ const generateAdminNotification = (order: any) => {
 
     <h2>Customer</h2>
     <p>
-      <strong style="display:block;font-size:14px;letter-spacing:1px;">${order.checkout_data.firstName} ${order.checkout_data.lastName}</strong>
+      <strong style="display:block;font-size:14px;letter-spacing:1px;font-family:'Arial', sans-serif;">
+        ${order.checkout_data.firstName} ${order.checkout_data.lastName}
+      </strong>
       ${order.checkout_data.email}<br/>
       ${order.checkout_data.phone}
     </p>
@@ -516,7 +498,10 @@ const generateAdminNotification = (order: any) => {
     </div>
 
     <h2>Pieces Ordered</h2>
-    <ul class="items-list">${itemDetails}</ul>
+    <!-- Render Product Images & Details -->
+    <div style="margin-top: 16px;">
+      ${buildOrderItemsHtml(order.cart_items || [])}
+    </div>
 
     <div class="total-box">
       <div class="label">Total</div>
@@ -558,7 +543,7 @@ const generateContactEmail = (contact: any) => {
 
     <h2>From</h2>
     <div class="info-block">
-      <strong style="display:block;font-size:14px;letter-spacing:1px;">${contact.name}</strong>
+      <strong style="display:block;font-size:14px;letter-spacing:1px;font-family:'Arial', sans-serif;">${contact.name}</strong>
       <a href="mailto:${contact.email}" style="color:${COLORS.green};text-decoration:none;">${contact.email}</a>
     </div>
 
