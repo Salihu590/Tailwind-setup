@@ -153,7 +153,7 @@ const AfricanPatternBg = memo(function AfricanPatternBg() {
 // ─── MANWE Gradient Text ──────────────────────────────────────────────────────
 
 const ManweGradientText = memo(function ManweGradientText({
-  fontSize = "clamp(80px, 18vw, 200px)",
+  fontSize = "clamp(64px, 15vw, 140px)",
   className = "",
   as: Tag = "span",
 }) {
@@ -230,7 +230,6 @@ const LogisticsTicker = memo(function LogisticsTicker() {
       className="manwe-freight group w-full py-4 border-y border-white/10 bg-[#080808] relative overflow-hidden select-none"
       aria-hidden="true"
     >
-      {/* Grid Background */}
       <div
         className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
         style={{
@@ -240,35 +239,27 @@ const LogisticsTicker = memo(function LogisticsTicker() {
         }}
       />
 
-      {/* Scanner Laser */}
       <div className="manwe-laser absolute top-0 bottom-0 w-[2px] bg-[#C4541A] z-20 opacity-0 group-hover:opacity-100" />
 
-      {/* Scrolling Content */}
-      <div className="flex manwe-marquee-fast group-hover:[animation-play-state:paused] relative z-10 whitespace-nowrap">
+      {/* Added w-max to prevent flex blowout on mobile */}
+      <div className="flex manwe-marquee-fast group-hover:[animation-play-state:paused] relative z-10 whitespace-nowrap w-max">
         {Array(4).fill(null).map((_, i) => (
           <div key={i} className="flex items-center gap-10 px-10 shrink-0">
             <span className="font-mono text-[10px] text-gray-500 tracking-[0.2em] group-hover:text-[#E8E3D8] transition-colors duration-500">
               WAYBILL: MW-8472-X
             </span>
-
             <AdinkraDiamond size={6} fill="#1A5C2A" opacity={0.5} />
-
             <span className="font-mono text-[10px] text-[#E8E3D8]/70 tracking-[0.2em] group-hover:text-[#C4541A] transition-colors duration-500">
               ROUTE: LOS (6.52°N) ✈ ABJ (5.35°N)
             </span>
-
             <AdinkraDiamond size={6} fill="#C4541A" opacity={0.5} />
-
             <span
               className="manwe-barcode-bars text-gray-600 font-bold"
               style={{ fontFamily: "monospace", fontSize: "16px", letterSpacing: "-1.5px" }}
             >
               ||| || | |||| || | || |||| | ||
             </span>
-
             <AdinkraDiamond size={6} fill="#1A5C2A" opacity={0.5} />
-
-            {/* Slot machine text flip */}
             <span className="font-mono text-[10px] tracking-[0.2em] relative overflow-hidden inline-flex h-[14px] w-[160px]">
               <span className="absolute inset-0 flex items-center text-gray-500 transition-transform duration-300 group-hover:-translate-y-full">
                 STATUS: IN-TRANSIT
@@ -277,9 +268,7 @@ const LogisticsTicker = memo(function LogisticsTicker() {
                 BORDER CLEARED //
               </span>
             </span>
-
             <AdinkraDiamond size={6} fill="#C4541A" opacity={0.5} />
-
             <span className="font-mono text-[10px] text-gray-500 tracking-[0.2em] group-hover:text-[#E8E3D8] transition-colors duration-500">
               CARGO: MANWE // FW26 DROP
             </span>
@@ -329,7 +318,7 @@ const HeroSection = memo(function HeroSection({ currentSlide, onShopClick }) {
 
       <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-[#080808] to-transparent z-10" aria-hidden="true" />
       <div className="absolute bottom-0 left-0 right-0 h-2/3 bg-gradient-to-t from-[#080808] via-[#080808]/60 to-transparent z-10" aria-hidden="true" />
-      <div className="absolute top-0 left-0 bottom-0 w-1/3 bg-gradient-to-r from-[#080808]/80 to-transparent z-10" aria-hidden="true" />
+      <div className="absolute top-0 left-0 bottom-0 w-full lg:w-1/3 bg-gradient-to-r from-[#080808]/90 via-[#080808]/40 to-transparent z-10" aria-hidden="true" />
 
       <div className="absolute inset-0 z-10 pointer-events-none" aria-hidden="true">
         <div className="absolute top-1/2 right-8 -translate-y-1/2 hidden lg:block">
@@ -363,22 +352,27 @@ const HeroSection = memo(function HeroSection({ currentSlide, onShopClick }) {
         ))}
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 z-20 p-6 lg:p-16 pb-16">
+      {/* FIXED MOBILE LAYOUT: Centered on mobile, left-aligned on desktop */}
+      <div className="absolute bottom-0 left-0 right-0 z-20 p-6 lg:p-16 pb-12 lg:pb-16 flex flex-col items-center text-center lg:items-start lg:text-left">
         <div className="mb-4 animate-bounce"><ManweBeastEmblem size={32} opacity={0.8} /></div>
 
         <h1 className="leading-none mb-2 manwe-drop">
-          <ManweGradientText className="manwe-glitch" data-text="MANWE" />
+          <ManweGradientText className="manwe-glitch" data-text="MANWE" fontSize="clamp(64px, 15vw, 140px)" />
           <span className="sr-only">MANWE — West African Futurism</span>
         </h1>
 
         <p
           className="text-[#E8E3D8]/60 mb-2 manwe-tape"
-          style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "clamp(18px, 4vw, 36px)", letterSpacing: "0.2em" }}
+          style={{
+            fontFamily: "'Bebas Neue', sans-serif",
+            fontSize: "clamp(16px, 4vw, 32px)",
+            letterSpacing: "0.2em",
+          }}
         >
           WEST AFRICAN FUTURISM
         </p>
 
-        <div className="flex items-center gap-2 mb-8" aria-hidden="true">
+        <div className="flex items-center justify-center lg:justify-start gap-2 mb-8 w-full" aria-hidden="true">
           <div className="w-8 h-px bg-[#1A5C2A]" />
           <AdinkraDiamond size={8} fill="#C4541A" opacity={0.7} />
           <div className="w-8 h-px bg-[#C4541A]" />
@@ -389,10 +383,11 @@ const HeroSection = memo(function HeroSection({ currentSlide, onShopClick }) {
           <div className="w-8 h-px bg-[#1A5C2A]" />
         </div>
 
+        {/* FIXED BUTTON: Changed flex to inline-flex w-fit so it doesn't span full width */}
         <button
           type="button"
           onClick={onShopClick}
-          className="group relative flex items-center gap-5 border border-[#E8E3D8]/30 hover:border-[#E8E3D8] focus-visible:border-[#E8E3D8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C4541A] px-8 py-4 hover:bg-[#E8E3D8] transition-all duration-300 manwe-shake-hover"
+          className="group relative inline-flex items-center justify-center gap-5 border border-[#E8E3D8]/30 hover:border-[#E8E3D8] focus-visible:border-[#E8E3D8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C4541A] px-8 py-4 hover:bg-[#E8E3D8] transition-all duration-300 manwe-shake-hover w-fit"
           aria-label="Scroll to product catalog"
         >
           <span className="absolute -top-1 -left-1"><AdinkraDiamond size={7} fill="#1A5C2A" opacity={0.6} /></span>
@@ -423,7 +418,7 @@ const HeroSection = memo(function HeroSection({ currentSlide, onShopClick }) {
 const DesktopSidebar = memo(function DesktopSidebar({ selectedCategory, onCategoryChange }) {
   return (
     <aside
-      className="hidden lg:flex flex-col justify-between w-60 p-8 h-screen sticky top-0 border-r border-gray-800/60 bg-[#0a0a0a] relative overflow-hidden"
+      className="hidden lg:flex flex-col justify-between w-60 p-8 h-screen sticky top-0 border-r border-gray-800/60 bg-[#0a0a0a] relative overflow-hidden shrink-0"
       aria-label="Shop navigation"
     >
       <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
@@ -851,7 +846,8 @@ export default function Shop() {
         SKIP TO PRODUCTS
       </a>
 
-      <div className="flex flex-col min-h-screen" style={{ backgroundColor: "#080808", color: "#E8E3D8" }}>
+      {/* ROOT WRAPPER: Fixed horizontal overflow issue here */}
+      <div className="flex flex-col min-h-screen w-full max-w-[100vw] overflow-x-hidden" style={{ backgroundColor: "#080808", color: "#E8E3D8" }}>
         <Header
           toggleMenu={() => { setMenuOpen((v) => !v); setSearchOpen(false); }}
           toggleSearch={() => { setSearchOpen((v) => !v); setMenuOpen(false); }}
@@ -863,7 +859,7 @@ export default function Shop() {
 
         <HeroSection currentSlide={currentSlide} onShopClick={scrollToGrid} />
 
-        <div className="flex flex-1">
+        <div className="flex flex-1 w-full max-w-full">
           <DesktopSidebar
             selectedCategory={selectedCategory}
             onCategoryChange={handleCategoryChange}
@@ -879,7 +875,7 @@ export default function Shop() {
           <main
             ref={productGridRef}
             id="product-grid"
-            className="flex-1 w-full px-6 py-12 lg:px-10 lg:py-12 relative"
+            className="flex-1 w-full px-6 py-12 lg:px-10 lg:py-12 relative min-w-0"
             aria-label="Product catalog"
           >
             <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
@@ -914,7 +910,7 @@ export default function Shop() {
             <PatternDivider />
 
             {/* ProductGrid owns loading state via Skeleton */}
-            <div className="relative z-10">
+            <div className="relative z-10 w-full">
               <ProductGrid
                 products={filteredProducts}
                 isLoading={isLoading}
@@ -927,7 +923,7 @@ export default function Shop() {
         {/* Freight & Customs Ticker sits between shop grid and newsletter */}
         <LogisticsTicker />
 
-        <section className="manwe-noise">
+        <section className="manwe-noise w-full">
           <NewsletterForm />
         </section>
         <ManweFooter />
